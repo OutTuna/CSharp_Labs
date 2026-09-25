@@ -12,6 +12,7 @@ class Program {
             Console.WriteLine();
             Console.WriteLine("1. Пацієнти");
             Console.WriteLine("2. Лікарі");
+            Console.WriteLine("3. Записи (демо)");
             Console.WriteLine("0. Вихід");
             Console.Write("Ваш вибір: ");
 
@@ -21,6 +22,9 @@ class Program {
                 PatientsMenu(patients);
             } else if (choice == "2") {
                 DoctorsMenu(doctors);
+            } else if (choice == "3") {
+                AppointmentsDemo();
+                Pause();
             } else if (choice == "0") {
                 break;
             } else {
@@ -127,12 +131,68 @@ class Program {
         }
     }
 
+    static void AppointmentsDemo() {
+        
+        DateTime tomorrow = DateTime.Today.AddDays(1);
+        Appointment a1 = new Appointment(1, 1, tomorrow.AddHours(10), 30);
+        Appointment a2 = new Appointment(2, 2, tomorrow.AddHours(11), 45);
+        Appointment a3 = new Appointment(3, 3, tomorrow.AddDays(1).AddHours(9), 20);
+
+        Console.WriteLine("Створені записи:");
+        Console.WriteLine(a1);
+        Console.WriteLine(a2);
+        Console.WriteLine(a3);
+
+        Console.WriteLine();
+        Console.WriteLine("Змінюємо статуси...");
+
+        bool cancelA1 = a1.Cancel("Пацієнт не зміг прийти");
+        Console.WriteLine($"Скасування запису [{a1.Id}]: {(cancelA1 ? "успішно" : "помилка")}");
+
+        bool completeA2 = a2.Complete();
+        Console.WriteLine($"Завершення запису [{a2.Id}]: {(completeA2 ? "успішно" : "помилка")}");
+
+        bool cancelA2Again = a2.Cancel("Спроба скасувати завершений запис");
+        Console.WriteLine($"Повторне скасування запису [{a2.Id}]: {(cancelA2Again ? "успішно" : "помилка")}");
+
+        bool completeA1 = a1.Complete();
+        Console.WriteLine($"Завершення скасованого запису [{a1.Id}]: {(completeA1 ? "успішно" : "помилка")}");
+
+        Console.WriteLine();
+        Console.WriteLine("Записи після змін:");
+        Console.WriteLine(a1);
+        Console.WriteLine(a2);
+        Console.WriteLine(a3);
+
+        Console.WriteLine();
+        Console.WriteLine("Майбутні записи (IsUpcoming):");
+
+        int upcomingCount = 0;
+
+        if (a1.IsUpcoming) {
+            Console.WriteLine(a1);
+            upcomingCount++;
+        }
+
+        if (a2.IsUpcoming) {
+            Console.WriteLine(a2);
+            upcomingCount++;
+        }
+
+        if (a3.IsUpcoming) {
+            Console.WriteLine(a3);
+            upcomingCount++;
+        }
+
+        if (upcomingCount == 0) {
+            Console.WriteLine("Немає майбутніх записів зі статусом Scheduled.");
+        }
+    }
+
     static void AddPatient(PatientManager patients) {
         Console.WriteLine();
-
         string firstName = ReadNonEmpty("Ім'я: ", "Невідомий");
         string lastName = ReadNonEmpty("Прізвище: ", "Пацієнт");
-
         string dateText = ReadNonEmpty("Дата народження (дд.мм.рррр): ", "");
 
         DateTime dateOfBirth;
@@ -152,7 +212,6 @@ class Program {
 
     static void AddDoctor(DoctorManager doctors) {
         Console.WriteLine();
-
         string firstName = ReadNonEmpty("Ім'я: ", "Невідомий");
         string lastName = ReadNonEmpty("Прізвище: ", "Лікар");
         string speciality = ReadNonEmpty("Спеціальність: ", "Невідомо");
@@ -164,8 +223,10 @@ class Program {
         Console.WriteLine("Графік роботи (залиште порожнім для 8–17):");
 
         string startText = ReadNonEmpty("Початок роботи (година, напр. 8): ", "");
+
         if (startText.Length > 0) {
             int workStart;
+
             if (int.TryParse(startText, out workStart) && workStart >= 0 && workStart <= 23) {
                 doctor.WorkStartHour = workStart;
             } else {
@@ -174,8 +235,10 @@ class Program {
         }
 
         string endText = ReadNonEmpty("Кінець роботи (година, напр. 17): ", "");
+
         if (endText.Length > 0) {
             int workEnd;
+
             if (int.TryParse(endText, out workEnd) && workEnd >= 0 && workEnd <= 23) {
                 doctor.WorkEndHour = workEnd;
             } else {
