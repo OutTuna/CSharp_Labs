@@ -2,30 +2,34 @@
 
 class Program {
     static void Main() {
-        PatientManager patients = new PatientManager();
-        DoctorManager doctors = new DoctorManager();
-        AppointmentManager appointments = new AppointmentManager(patients, doctors);
+        Clinic clinic = new Clinic("Медична Клініка");
 
-        SeedPatients(patients);
-        SeedDoctors(doctors);
-        SeedAppointments(appointments);
+        SeedClinic(clinic);
 
         while (true) {
             Console.WriteLine();
             Console.WriteLine("1. Пацієнти");
             Console.WriteLine("2. Лікарі");
             Console.WriteLine("3. Записи");
+            Console.WriteLine("4. Розклад на дату");
+            Console.WriteLine("5. Звіт клініки");
             Console.WriteLine("0. Вихід");
             Console.Write("Ваш вибір: ");
 
             string choice = Console.ReadLine()!;
 
             if (choice == "1") {
-                PatientsMenu(patients);
+                PatientsMenu(clinic);
             } else if (choice == "2") {
-                DoctorsMenu(doctors);
+                DoctorsMenu(clinic);
             } else if (choice == "3") {
-                AppointmentsMenu(appointments, patients, doctors);
+                AppointmentsMenu(clinic);
+            } else if (choice == "4") {
+                ShowSchedule(clinic);
+                Pause();
+            } else if (choice == "5") {
+                clinic.GenerateReport();
+                Pause();
             } else if (choice == "0") {
                 break;
             } else {
@@ -34,41 +38,37 @@ class Program {
         }
     }
 
-    static void SeedPatients(PatientManager patients) {
-        patients.Add(new Patient("Іван", "Петренко", new DateTime(1985, 5, 10), "A+", "0501234567"));
-        patients.Add(new Patient("Олена", "Коваль", new DateTime(1993, 8, 22), "B-", "0672345678"));
-        patients.Add(new Patient("Максим", "Бойко", new DateTime(2010, 3, 15), "O+", "0933456789"));
-        patients.Add(new Patient("Марія", "Ткач"));
-    }
+    static void SeedClinic(Clinic clinic) {
+        clinic.Patients.Add(new Patient("Іван", "Петренко", new DateTime(1985, 5, 10), "A+", "0501234567"));
+        clinic.Patients.Add(new Patient("Олена", "Коваль", new DateTime(1993, 8, 22), "B-", "0672345678"));
+        clinic.Patients.Add(new Patient("Максим", "Бойко", new DateTime(2010, 3, 15), "O+", "0933456789"));
+        clinic.Patients.Add(new Patient("Марія", "Ткач"));
 
-    static void SeedDoctors(DoctorManager doctors) {
         Doctor d1 = new Doctor("Олег", "Сидоренко", "Кардіологія", "LIC-001", "0441234567");
         d1.WorkEndHour = 16;
-        doctors.Add(d1);
+        clinic.Doctors.Add(d1);
 
         Doctor d2 = new Doctor("Наталія", "Мороз", "Неврологія", "LIC-002", "0442345678");
         d2.WorkStartHour = 9;
         d2.WorkEndHour = 18;
-        doctors.Add(d2);
+        clinic.Doctors.Add(d2);
 
         Doctor d3 = new Doctor("Андрій", "Власенко", "Педіатрія", "LIC-003", "0443456789");
-        doctors.Add(d3);
+        clinic.Doctors.Add(d3);
 
         Doctor d4 = new Doctor("Марія", "Іваненко", "Кардіологія", "LIC-004", "0445678901");
         d4.WorkStartHour = 12;
         d4.WorkEndHour = 20;
-        doctors.Add(d4);
-    }
+        clinic.Doctors.Add(d4);
 
-    static void SeedAppointments(AppointmentManager appointments) {
         DateTime tomorrow = DateTime.Today.AddDays(1);
 
-        appointments.Book(1, 1, tomorrow.AddHours(10), 30);
-        appointments.Book(2, 2, tomorrow.AddHours(11), 45);
-        appointments.Book(3, 3, tomorrow.AddDays(1).AddHours(9), 20);
+        clinic.Appointments.Book(1, 1, tomorrow.AddHours(10), 30);
+        clinic.Appointments.Book(2, 2, tomorrow.AddHours(11), 45);
+        clinic.Appointments.Book(3, 3, tomorrow.AddDays(1).AddHours(9), 20);
     }
-
-    static void PatientsMenu(PatientManager patients) {
+    
+    static void PatientsMenu(Clinic clinic) {
         while (true) {
             Console.WriteLine();
             Console.WriteLine("1. Показати всіх");
@@ -86,15 +86,15 @@ class Program {
             }
 
             if (choice == "1") {
-                patients.DisplayAll();
+                clinic.Patients.DisplayAll();
             } else if (choice == "2") {
-                AddPatient(patients);
+                AddPatient(clinic);
             } else if (choice == "3") {
-                FindPatientsByName(patients);
+                FindPatientsByName(clinic);
             } else if (choice == "4") {
-                RemovePatientById(patients);
+                RemovePatientById(clinic);
             } else if (choice == "5") {
-                patients.DisplayStats();
+                clinic.Patients.DisplayStats();
             } else {
                 Console.WriteLine("Невідомий пункт меню.");
                 continue;
@@ -103,8 +103,7 @@ class Program {
             Pause();
         }
     }
-
-    static void DoctorsMenu(DoctorManager doctors) {
+    static void DoctorsMenu(Clinic clinic) {
         while (true) {
             Console.WriteLine();
             Console.WriteLine("1. Показати всіх");
@@ -122,15 +121,15 @@ class Program {
             }
 
             if (choice == "1") {
-                doctors.DisplayAll();
+                clinic.Doctors.DisplayAll();
             } else if (choice == "2") {
-                AddDoctor(doctors);
+                AddDoctor(clinic);
             } else if (choice == "3") {
-                FindDoctorsBySpeciality(doctors);
+                FindDoctorsBySpeciality(clinic);
             } else if (choice == "4") {
-                RemoveDoctorById(doctors);
+                RemoveDoctorById(clinic);
             } else if (choice == "5") {
-                doctors.DisplayStats();
+                clinic.Doctors.DisplayStats();
             } else {
                 Console.WriteLine("Невідомий пункт меню.");
                 continue;
@@ -139,8 +138,7 @@ class Program {
             Pause();
         }
     }
-
-    static void AppointmentsMenu(AppointmentManager appointments, PatientManager patients, DoctorManager doctors) {
+    static void AppointmentsMenu(Clinic clinic) {
         while (true) {
             Console.WriteLine();
             Console.WriteLine("1. Показати майбутні записи");
@@ -160,19 +158,19 @@ class Program {
             }
 
             if (choice == "1") {
-                appointments.DisplayList(appointments.GetUpcoming());
+                clinic.Appointments.DisplayList(clinic.Appointments.GetUpcoming());
             } else if (choice == "2") {
-                ShowAppointmentsByPatient(appointments, patients);
+                ShowAppointmentsByPatient(clinic);
             } else if (choice == "3") {
-                ShowAppointmentsByDoctor(appointments, doctors);
+                ShowAppointmentsByDoctor(clinic);
             } else if (choice == "4") {
-                ShowAppointmentsByDate(appointments);
+                ShowAppointmentsByDate(clinic);
             } else if (choice == "5") {
-                BookAppointment(appointments, patients, doctors);
+                BookAppointment(clinic);
             } else if (choice == "6") {
-                CancelAppointment(appointments);
+                CancelAppointment(clinic);
             } else if (choice == "7") {
-                CompleteAppointment(appointments);
+                CompleteAppointment(clinic);
             } else {
                 Console.WriteLine("Невідомий пункт меню.");
                 continue;
@@ -182,7 +180,20 @@ class Program {
         }
     }
 
-    static void AddPatient(PatientManager patients) {
+    static void ShowSchedule(Clinic clinic) {
+        string dateText = ReadNonEmpty("Введіть дату (дд.мм.рррр): ", "");
+
+        DateTime date;
+
+        if (!DateTime.TryParse(dateText, out date)) {
+            Console.WriteLine("Некоректна дата.");
+            return;
+        }
+
+        clinic.DisplaySchedule(date);
+    }
+
+    static void AddPatient(Clinic clinic) {
         string firstName = ReadNonEmpty("Ім'я: ", "Невідомий");
         string lastName = ReadNonEmpty("Прізвище: ", "Пацієнт");
 
@@ -200,10 +211,10 @@ class Program {
 
         Patient patient = new Patient(firstName, lastName, dateOfBirth, bloodType, phone);
 
-        patients.Add(patient);
+        clinic.Patients.Add(patient);
     }
 
-    static void AddDoctor(DoctorManager doctors) {
+    static void AddDoctor(Clinic clinic) {
         string firstName = ReadNonEmpty("Ім'я: ", "Невідомий");
         string lastName = ReadNonEmpty("Прізвище: ", "Лікар");
         string speciality = ReadNonEmpty("Спеціальність: ", "Невідомо");
@@ -238,10 +249,10 @@ class Program {
             }
         }
 
-        doctors.Add(doctor);
+        clinic.Doctors.Add(doctor);
     }
 
-    static void FindPatientsByName(PatientManager patients) {
+    static void FindPatientsByName(Clinic clinic) {
         string query = ReadNonEmpty("Введіть частину імені або прізвища: ", "");
 
         if (query.Length == 0) {
@@ -249,7 +260,7 @@ class Program {
             return;
         }
 
-        Patient[] found = patients.FindByName(query);
+        Patient[] found = clinic.Patients.FindByName(query);
 
         if (found.Length == 0) {
             Console.WriteLine("Нічого не знайдено.");
@@ -261,7 +272,7 @@ class Program {
         }
     }
 
-    static void FindDoctorsBySpeciality(DoctorManager doctors) {
+    static void FindDoctorsBySpeciality(Clinic clinic) {
         string query = ReadNonEmpty("Введіть частину спеціальності: ", "");
 
         if (query.Length == 0) {
@@ -269,7 +280,7 @@ class Program {
             return;
         }
 
-        Doctor[] found = doctors.FindBySpeciality(query);
+        Doctor[] found = clinic.Doctors.FindBySpeciality(query);
 
         if (found.Length == 0) {
             Console.WriteLine("Нічого не знайдено.");
@@ -281,7 +292,7 @@ class Program {
         }
     }
 
-    static void RemovePatientById(PatientManager patients) {
+    static void RemovePatientById(Clinic clinic) {
         string input = ReadNonEmpty("Введіть ID пацієнта для видалення: ", "");
 
         int id;
@@ -291,14 +302,14 @@ class Program {
             return;
         }
 
-        if (patients.Remove(id)) {
+        if (clinic.Patients.Remove(id)) {
             Console.WriteLine($"Пацієнта з ID {id} видалено.");
         } else {
             Console.WriteLine($"Пацієнта з ID {id} не знайдено.");
         }
     }
 
-    static void RemoveDoctorById(DoctorManager doctors) {
+    static void RemoveDoctorById(Clinic clinic) {
         string input = ReadNonEmpty("Введіть ID лікаря для видалення: ", "");
 
         int id;
@@ -308,15 +319,15 @@ class Program {
             return;
         }
 
-        if (doctors.Remove(id)) {
+        if (clinic.Doctors.Remove(id)) {
             Console.WriteLine($"Лікаря з ID {id} видалено.");
         } else {
             Console.WriteLine($"Лікаря з ID {id} не знайдено.");
         }
     }
 
-    static void ShowAppointmentsByPatient(AppointmentManager appointments, PatientManager patients) {
-        patients.DisplayAll();
+    static void ShowAppointmentsByPatient(Clinic clinic) {
+        clinic.Patients.DisplayAll();
 
         string input = ReadNonEmpty("Введіть ID пацієнта: ", "");
 
@@ -327,11 +338,11 @@ class Program {
             return;
         }
 
-        appointments.DisplayList(appointments.GetByPatient(id));
+        clinic.Appointments.DisplayList(clinic.Appointments.GetByPatient(id));
     }
 
-    static void ShowAppointmentsByDoctor(AppointmentManager appointments, DoctorManager doctors) {
-        doctors.DisplayAll();
+    static void ShowAppointmentsByDoctor(Clinic clinic) {
+        clinic.Doctors.DisplayAll();
 
         string input = ReadNonEmpty("Введіть ID лікаря: ", "");
 
@@ -342,10 +353,10 @@ class Program {
             return;
         }
 
-        appointments.DisplayList(appointments.GetByDoctor(id));
+        clinic.Appointments.DisplayList(clinic.Appointments.GetByDoctor(id));
     }
 
-    static void ShowAppointmentsByDate(AppointmentManager appointments) {
+    static void ShowAppointmentsByDate(Clinic clinic) {
         string dateText = ReadNonEmpty("Введіть дату (дд.мм.рррр): ", "");
 
         DateTime date;
@@ -355,11 +366,11 @@ class Program {
             return;
         }
 
-        appointments.DisplayList(appointments.GetByDate(date));
+        clinic.Appointments.DisplayList(clinic.Appointments.GetByDate(date));
     }
 
-    static void BookAppointment(AppointmentManager appointments, PatientManager patients, DoctorManager doctors) {
-        patients.DisplayAll();
+    static void BookAppointment(Clinic clinic) {
+        clinic.Patients.DisplayAll();
 
         string patientInput = ReadNonEmpty("Введіть ID пацієнта: ", "");
 
@@ -370,7 +381,7 @@ class Program {
             return;
         }
 
-        doctors.DisplayAll();
+        clinic.Doctors.DisplayAll();
 
         string doctorInput = ReadNonEmpty("Введіть ID лікаря: ", "");
 
@@ -415,10 +426,10 @@ class Program {
             }
         }
 
-        appointments.Book(patientId, doctorId, scheduledAt, durationMinutes);
+        clinic.Appointments.Book(patientId, doctorId, scheduledAt, durationMinutes);
     }
 
-    static void CancelAppointment(AppointmentManager appointments) {
+    static void CancelAppointment(Clinic clinic) {
         string input = ReadNonEmpty("Введіть ID запису для скасування: ", "");
 
         int id;
@@ -427,36 +438,27 @@ class Program {
             Console.WriteLine("Некоректний ID.");
             return;
         }
-
         string reason = ReadNonEmpty("Введіть причину (або залиште порожнім): ", "");
-
-        appointments.Cancel(id, reason);
+        clinic.Appointments.Cancel(id, reason);
     }
 
-    static void CompleteAppointment(AppointmentManager appointments) {
+    static void CompleteAppointment(Clinic clinic) {
         string input = ReadNonEmpty("Введіть ID запису для завершення: ", "");
-
         int id;
-
         if (!int.TryParse(input, out id)) {
             Console.WriteLine("Некоректний ID.");
             return;
         }
-
-        appointments.Complete(id);
+        clinic.Appointments.Complete(id);
     }
 
     static string ReadNonEmpty(string prompt, string defaultValue) {
         Console.Write(prompt);
-
         string input = Console.ReadLine()!;
-
         input = input.Trim();
-
         if (input.Length == 0) {
             return defaultValue;
         }
-
         return input;
     }
 
