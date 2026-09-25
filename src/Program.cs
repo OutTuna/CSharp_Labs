@@ -13,6 +13,7 @@ class Program {
             Console.WriteLine("3. Записи");
             Console.WriteLine("4. Розклад на дату");
             Console.WriteLine("5. Звіт клініки");
+            Console.WriteLine("6. Тест зростаючого масиву");
             Console.WriteLine("0. Вихід");
             Console.Write("Ваш вибір: ");
 
@@ -29,6 +30,9 @@ class Program {
                 Pause();
             } else if (choice == "5") {
                 clinic.GenerateReport();
+                Pause();
+            } else if (choice == "6") {
+                TestGrowablePatientManager();
                 Pause();
             } else if (choice == "0") {
                 break;
@@ -67,7 +71,7 @@ class Program {
         clinic.Appointments.Book(2, 2, tomorrow.AddHours(11), 45);
         clinic.Appointments.Book(3, 3, tomorrow.AddDays(1).AddHours(9), 20);
     }
-    
+
     static void PatientsMenu(Clinic clinic) {
         while (true) {
             Console.WriteLine();
@@ -103,6 +107,7 @@ class Program {
             Pause();
         }
     }
+
     static void DoctorsMenu(Clinic clinic) {
         while (true) {
             Console.WriteLine();
@@ -138,6 +143,7 @@ class Program {
             Pause();
         }
     }
+
     static void AppointmentsMenu(Clinic clinic) {
         while (true) {
             Console.WriteLine();
@@ -191,6 +197,59 @@ class Program {
         }
 
         clinic.DisplaySchedule(date);
+    }
+
+    static void TestGrowablePatientManager() {
+        GrowablePatientManager manager = new GrowablePatientManager();
+
+        Console.WriteLine();
+        Console.WriteLine("Тест GrowablePatientManager");
+        Console.WriteLine("Додаємо пацієнтів одного за одним...");
+
+        bool tenthSaved = false;
+        int tenthId = 0;
+
+        for (int i = 1; i <= 20; i++) {
+            Patient patient = new Patient("Тест", "Пацієнт" + i, new DateTime(1990, 1, 1), "A+", "0000000000");
+
+            if (i == 10) {
+                tenthSaved = true;
+                tenthId = patient.Id;
+            }
+
+            manager.Add(patient);
+
+            Console.WriteLine($"Додано [{patient.Id}]. Розмір: {manager.Count} / {manager.Capacity}");
+        }
+
+        Console.WriteLine();
+        Console.WriteLine("Тест пошуку:");
+
+        if (tenthSaved) {
+            Patient found = manager.FindById(tenthId);
+
+            if (found == null) {
+                Console.WriteLine($"FindById({tenthId}) → не знайдено");
+            } else {
+                Console.WriteLine($"FindById({tenthId}) → {found.FullName}");
+            }
+        }
+
+        Patient notFound = manager.FindById(999999);
+
+        if (notFound == null) {
+            Console.WriteLine("FindById(999999) → не знайдено");
+        } else {
+            Console.WriteLine($"FindById(999999) → {notFound.FullName}");
+        }
+
+        Console.WriteLine();
+        Console.WriteLine("Порівняння:");
+        Console.WriteLine("PatientManager:         100 місць (фіксовано)");
+        Console.WriteLine($"GrowablePatientManager: {manager.Capacity} місця (зросте при потребі)");
+
+        Console.WriteLine();
+        manager.DisplayAll();
     }
 
     static void AddPatient(Clinic clinic) {
@@ -438,27 +497,36 @@ class Program {
             Console.WriteLine("Некоректний ID.");
             return;
         }
+
         string reason = ReadNonEmpty("Введіть причину (або залиште порожнім): ", "");
+
         clinic.Appointments.Cancel(id, reason);
     }
 
     static void CompleteAppointment(Clinic clinic) {
         string input = ReadNonEmpty("Введіть ID запису для завершення: ", "");
+
         int id;
+
         if (!int.TryParse(input, out id)) {
             Console.WriteLine("Некоректний ID.");
             return;
         }
+
         clinic.Appointments.Complete(id);
     }
 
     static string ReadNonEmpty(string prompt, string defaultValue) {
         Console.Write(prompt);
+
         string input = Console.ReadLine()!;
+
         input = input.Trim();
+
         if (input.Length == 0) {
             return defaultValue;
         }
+
         return input;
     }
 
