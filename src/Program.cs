@@ -1,49 +1,62 @@
 ﻿namespace ClinicApp;
 
-class Program
-{
-    static void Main()
-    {
+class Program {
+    static void Main() {
         PatientManager patients = new PatientManager();
+        DoctorManager doctors = new DoctorManager();
 
         SeedPatients(patients);
+        SeedDoctors(doctors);
 
-        while (true)
-        {
+        while (true) {
             Console.WriteLine();
             Console.WriteLine("1. Пацієнти");
+            Console.WriteLine("2. Лікарі");
             Console.WriteLine("0. Вихід");
             Console.Write("Ваш вибір: ");
 
             string choice = Console.ReadLine()!;
 
-            if (choice == "1")
-            {
+            if (choice == "1") {
                 PatientsMenu(patients);
-            }
-            else if (choice == "0")
-            {
+            } else if (choice == "2") {
+                DoctorsMenu(doctors);
+            } else if (choice == "0") {
                 break;
-            }
-            else
-            {
+            } else {
                 Console.WriteLine("Невідомий пункт меню.");
             }
         }
     }
 
-    static void SeedPatients(PatientManager patients)
-    {
+    static void SeedPatients(PatientManager patients) {
         patients.Add(new Patient("Іван", "Петренко", new DateTime(1985, 5, 10), "A+", "0501234567"));
         patients.Add(new Patient("Олена", "Коваль", new DateTime(1993, 8, 22), "B-", "0672345678"));
         patients.Add(new Patient("Максим", "Бойко", new DateTime(2010, 3, 15), "O+", "0933456789"));
         patients.Add(new Patient("Марія", "Ткач"));
     }
 
-    static void PatientsMenu(PatientManager patients)
-    {
-        while (true)
-        {
+    static void SeedDoctors(DoctorManager doctors) {
+        Doctor d1 = new Doctor("Олег", "Сидоренко", "Кардіологія", "LIC-001", "0441234567");
+        d1.WorkEndHour = 16;
+        doctors.Add(d1);
+
+        Doctor d2 = new Doctor("Наталія", "Мороз", "Неврологія", "LIC-002", "0442345678");
+        d2.WorkStartHour = 9;
+        d2.WorkEndHour = 18;
+        doctors.Add(d2);
+
+        Doctor d3 = new Doctor("Андрій", "Власенко", "Педіатрія", "LIC-003", "0443456789");
+        doctors.Add(d3);
+
+        Doctor d4 = new Doctor("Марія", "Іваненко", "Кардіологія", "LIC-004", "0445678901");
+        d4.WorkStartHour = 12;
+        d4.WorkEndHour = 20;
+        doctors.Add(d4);
+    }
+
+    static void PatientsMenu(PatientManager patients) {
+        while (true) {
             Console.WriteLine();
             Console.WriteLine("1. Показати всіх");
             Console.WriteLine("2. Додати пацієнта");
@@ -55,33 +68,21 @@ class Program
 
             string choice = Console.ReadLine()!;
 
-            if (choice == "0")
-            {
+            if (choice == "0") {
                 return;
             }
 
-            if (choice == "1")
-            {
+            if (choice == "1") {
                 patients.DisplayAll();
-            }
-            else if (choice == "2")
-            {
+            } else if (choice == "2") {
                 AddPatient(patients);
-            }
-            else if (choice == "3")
-            {
+            } else if (choice == "3") {
                 FindPatientsByName(patients);
-            }
-            else if (choice == "4")
-            {
+            } else if (choice == "4") {
                 RemovePatientById(patients);
-            }
-            else if (choice == "5")
-            {
+            } else if (choice == "5") {
                 patients.DisplayStats();
-            }
-            else
-            {
+            } else {
                 Console.WriteLine("Невідомий пункт меню.");
                 continue;
             }
@@ -90,10 +91,44 @@ class Program
         }
     }
 
-    static void AddPatient(PatientManager patients)
-    {
+    static void DoctorsMenu(DoctorManager doctors) {
+        while (true) {
+            Console.WriteLine();
+            Console.WriteLine("1. Показати всіх");
+            Console.WriteLine("2. Додати лікаря");
+            Console.WriteLine("3. Знайти за спеціальністю");
+            Console.WriteLine("4. Видалити за ID");
+            Console.WriteLine("5. Статистика");
+            Console.WriteLine("0. Назад");
+            Console.Write("Ваш вибір: ");
+
+            string choice = Console.ReadLine()!;
+
+            if (choice == "0") {
+                return;
+            }
+
+            if (choice == "1") {
+                doctors.DisplayAll();
+            } else if (choice == "2") {
+                AddDoctor(doctors);
+            } else if (choice == "3") {
+                FindDoctorsBySpeciality(doctors);
+            } else if (choice == "4") {
+                RemoveDoctorById(doctors);
+            } else if (choice == "5") {
+                doctors.DisplayStats();
+            } else {
+                Console.WriteLine("Невідомий пункт меню.");
+                continue;
+            }
+
+            Pause();
+        }
+    }
+
+    static void AddPatient(PatientManager patients) {
         Console.WriteLine();
-        Console.WriteLine("Додавання пацієнта");
 
         string firstName = ReadNonEmpty("Ім'я: ", "Невідомий");
         string lastName = ReadNonEmpty("Прізвище: ", "Пацієнт");
@@ -102,8 +137,7 @@ class Program
 
         DateTime dateOfBirth;
 
-        if (!DateTime.TryParse(dateText, out dateOfBirth))
-        {
+        if (!DateTime.TryParse(dateText, out dateOfBirth)) {
             dateOfBirth = new DateTime(2000, 1, 1);
             Console.WriteLine("Дата розпізнана некоректно. Використано 01.01.2000.");
         }
@@ -116,70 +150,131 @@ class Program
         patients.Add(patient);
     }
 
-    static void FindPatientsByName(PatientManager patients)
-    {
+    static void AddDoctor(DoctorManager doctors) {
+        Console.WriteLine();
+
+        string firstName = ReadNonEmpty("Ім'я: ", "Невідомий");
+        string lastName = ReadNonEmpty("Прізвище: ", "Лікар");
+        string speciality = ReadNonEmpty("Спеціальність: ", "Невідомо");
+        string licenseNumber = ReadNonEmpty("Номер ліцензії: ", "LIC-000");
+        string phone = ReadNonEmpty("Телефон: ", "0000000000");
+
+        Doctor doctor = new Doctor(firstName, lastName, speciality, licenseNumber, phone);
+
+        Console.WriteLine("Графік роботи (залиште порожнім для 8–17):");
+
+        string startText = ReadNonEmpty("Початок роботи (година, напр. 8): ", "");
+        if (startText.Length > 0) {
+            int workStart;
+            if (int.TryParse(startText, out workStart) && workStart >= 0 && workStart <= 23) {
+                doctor.WorkStartHour = workStart;
+            } else {
+                Console.WriteLine("Некоректна година. Використано 8.");
+            }
+        }
+
+        string endText = ReadNonEmpty("Кінець роботи (година, напр. 17): ", "");
+        if (endText.Length > 0) {
+            int workEnd;
+            if (int.TryParse(endText, out workEnd) && workEnd >= 0 && workEnd <= 23) {
+                doctor.WorkEndHour = workEnd;
+            } else {
+                Console.WriteLine("Некоректна година. Використано 17.");
+            }
+        }
+
+        doctors.Add(doctor);
+    }
+
+    static void FindPatientsByName(PatientManager patients) {
         string query = ReadNonEmpty("Введіть частину імені або прізвища: ", "");
 
-        if (query.Length == 0)
-        {
+        if (query.Length == 0) {
             Console.WriteLine("Пошуковий запит порожній.");
             return;
         }
 
         Patient[] found = patients.FindByName(query);
 
-        if (found.Length == 0)
-        {
+        if (found.Length == 0) {
             Console.WriteLine("Нічого не знайдено.");
             return;
         }
 
-        for (int i = 0; i < found.Length; i++)
-        {
+        for (int i = 0; i < found.Length; i++) {
             Console.WriteLine(found[i]);
         }
     }
 
-    static void RemovePatientById(PatientManager patients)
-    {
+    static void FindDoctorsBySpeciality(DoctorManager doctors) {
+        string query = ReadNonEmpty("Введіть частину спеціальності: ", "");
+
+        if (query.Length == 0) {
+            Console.WriteLine("Пошуковий запит порожній.");
+            return;
+        }
+
+        Doctor[] found = doctors.FindBySpeciality(query);
+
+        if (found.Length == 0) {
+            Console.WriteLine("Нічого не знайдено.");
+            return;
+        }
+
+        for (int i = 0; i < found.Length; i++) {
+            Console.WriteLine(found[i]);
+        }
+    }
+
+    static void RemovePatientById(PatientManager patients) {
         string input = ReadNonEmpty("Введіть ID пацієнта для видалення: ", "");
 
         int id;
 
-        if (!int.TryParse(input, out id))
-        {
+        if (!int.TryParse(input, out id)) {
             Console.WriteLine("Некоректний ID.");
             return;
         }
 
-        if (patients.Remove(id))
-        {
+        if (patients.Remove(id)) {
             Console.WriteLine($"Пацієнта з ID {id} видалено.");
-        }
-        else
-        {
+        } else {
             Console.WriteLine($"Пацієнта з ID {id} не знайдено.");
         }
     }
 
-    static string ReadNonEmpty(string prompt, string defaultValue)
-    {
+    static void RemoveDoctorById(DoctorManager doctors) {
+        string input = ReadNonEmpty("Введіть ID лікаря для видалення: ", "");
+
+        int id;
+
+        if (!int.TryParse(input, out id)) {
+            Console.WriteLine("Некоректний ID.");
+            return;
+        }
+
+        if (doctors.Remove(id)) {
+            Console.WriteLine($"Лікаря з ID {id} видалено.");
+        } else {
+            Console.WriteLine($"Лікаря з ID {id} не знайдено.");
+        }
+    }
+
+    static string ReadNonEmpty(string prompt, string defaultValue) {
         Console.Write(prompt);
 
         string input = Console.ReadLine()!;
 
         input = input.Trim();
 
-        if (input.Length == 0)
-        {
+        if (input.Length == 0) {
             return defaultValue;
         }
 
         return input;
     }
 
-    static void Pause()
-    {
+    static void Pause() {
         Console.WriteLine();
         Console.Write("Натисніть Enter, щоб продовжити...");
         Console.ReadLine();
