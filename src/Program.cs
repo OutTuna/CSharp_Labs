@@ -6,6 +6,8 @@ class Program {
 
         SeedClinic(clinic);
 
+        DemoTask4(clinic);
+
         while (true) {
             Console.WriteLine();
             Console.WriteLine("1. Пацієнти");
@@ -42,6 +44,67 @@ class Program {
         }
     }
 
+    static void DemoTask4(Clinic clinic) {
+        Console.WriteLine();
+        Console.WriteLine("=== Демонстрація Task 4 ===");
+
+        // ?. та ??
+        Console.WriteLine();
+        Console.WriteLine("FindById(1)?.FullName  ?? \"не знайдено\"  → "
+            + (clinic.Patients.FindById(1)?.FullName ?? "не знайдено"));
+        Console.WriteLine("FindById(99)?.FullName ?? \"не знайдено\"  → "
+            + (clinic.Patients.FindById(99)?.FullName ?? "не знайдено"));
+        Console.WriteLine("clinic.Patients[0]?.FullName   ?? \"не знайдено\" → "
+            + (clinic.Patients[0]?.FullName ?? "не знайдено"));
+        Console.WriteLine("clinic.Patients[999]?.FullName ?? \"не знайдено\" → "
+            + (clinic.Patients[999]?.FullName ?? "не знайдено"));
+
+        // TryFindById
+        Console.WriteLine();
+        if (clinic.Patients.TryFindById(3, out Patient foundPatient)) {
+            Console.WriteLine("TryFindById(3)  → знайдено: " + foundPatient.FullName);
+        } else {
+            Console.WriteLine("TryFindById(3)  → пацієнта не знайдено.");
+        }
+
+        if (!clinic.Patients.TryFindById(99, out Patient _)) {
+            Console.WriteLine("TryFindById(99) → пацієнта не знайдено (без винятку).");
+        }
+
+        if (clinic.Doctors.TryFindById(1, out Doctor foundDoctor)) {
+            Console.WriteLine("Doctors.TryFindById(1) → знайдено: " + foundDoctor.FullName);
+        }
+
+        // FindByBloodType
+        Console.WriteLine();
+        Patient[] aPositive = clinic.Patients.FindByBloodType(BloodType.APositive);
+        Console.WriteLine($"FindByBloodType(APositive) → знайдено {aPositive.Length}:");
+        for (int i = 0; i < aPositive.Length; i++) {
+            Console.WriteLine("  " + aPositive[i].FullName);
+        }
+
+        // Overload FindBySpeciality(Speciality)
+        Console.WriteLine();
+        Doctor[] cardiologists = clinic.Doctors.FindBySpeciality(Speciality.Cardiology);
+        Console.WriteLine($"FindBySpeciality(Speciality.Cardiology) → {cardiologists.Length}:");
+        for (int i = 0; i < cardiologists.Length; i++) {
+            Console.WriteLine("  " + cardiologists[i].FullName);
+        }
+
+        Doctor[] byString = clinic.Doctors.FindBySpeciality("cardio");
+        Console.WriteLine($"FindBySpeciality(\"cardio\")            → {byString.Length}");
+
+        // Overload GetByDate(int, int, int)
+        Console.WriteLine();
+        DateTime tomorrow = DateTime.Today.AddDays(1);
+        Appointment[] tomorrowAppointments = clinic.Appointments.GetByDate(tomorrow.Year, tomorrow.Month, tomorrow.Day);
+        Console.WriteLine($"GetByDate({tomorrow.Year}, {tomorrow.Month}, {tomorrow.Day}) → {tomorrowAppointments.Length} запис(ів).");
+
+        Console.WriteLine();
+        Console.WriteLine("=== Кінець демонстрації Task 4 ===");
+        Console.WriteLine();
+    }
+
     static void SeedClinic(Clinic clinic) {
         clinic.Patients.Add(new Patient("Іван", "Петренко", new DateTime(1985, 5, 10), BloodType.APositive, "0501234567"));
         clinic.Patients.Add(new Patient("Олена", "Коваль", new DateTime(1993, 8, 22), BloodType.BNegative, "0672345678"));
@@ -63,7 +126,6 @@ class Program {
         d4.Schedule = new WorkSchedule(12, 20);
         clinic.Doctors.Add(d4);
 
-        // Експеримент зі struct: value type копіюється при присвоєнні
         WorkSchedule morning = new WorkSchedule(8, 16);
         WorkSchedule copy = morning;
         Console.WriteLine();
