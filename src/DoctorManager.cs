@@ -39,7 +39,7 @@ public class DoctorManager {
         int matches = 0;
 
         for (int i = 0; i < _count; i++) {
-            string specialityLower = _doctors[i].Speciality.ToLower();
+            string specialityLower = _doctors[i].Speciality.ToString().ToLower();
 
             if (specialityLower.Contains(queryLower)) {
                 matches++;
@@ -51,7 +51,7 @@ public class DoctorManager {
         int index = 0;
 
         for (int i = 0; i < _count; i++) {
-            string specialityLower = _doctors[i].Speciality.ToLower();
+            string specialityLower = _doctors[i].Speciality.ToString().ToLower();
 
             if (specialityLower.Contains(queryLower)) {
                 result[index] = _doctors[i];

@@ -6,7 +6,7 @@ public class Doctor
     public int Id { get; }
     public string FirstName { get; set; }
     public string LastName { get; set; }
-    public string Speciality { get; set; }
+    public Speciality Speciality { get; set; }
     public string LicenseNumber { get; set; }
     public string Phone { get; set; }
     public int WorkStartHour { get; set; }
@@ -17,12 +17,12 @@ public class Doctor
 
     public string WorkSchedule =>
         WorkStartHour.ToString("D2") + ":00–" + WorkEndHour.ToString("D2") + ":00";
-    
-    public Doctor() : this("Невідомий", "Лікар", "Невідомо")
+
+    public Doctor() : this("Невідомий", "Лікар", Speciality.General)
     {
     }
 
-    public Doctor(string firstName, string lastName, string speciality)
+    public Doctor(string firstName, string lastName, Speciality speciality)
         : this(firstName, lastName, speciality, "LIC-000", "0000000000")
     {
     }
@@ -30,7 +30,7 @@ public class Doctor
     public Doctor(
         string firstName,
         string lastName,
-        string speciality,
+        Speciality speciality,
         string licenseNumber,
         string phone)
     {
