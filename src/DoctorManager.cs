@@ -5,6 +5,19 @@ public class DoctorManager {
     private Doctor[] _doctors = new Doctor[MaxDoctors];
     private int _count = 0;
     public int Count => _count;
+
+    public Doctor? this[int index]
+    {
+        get
+        {
+            if (index < 0 || index >= _count) {
+                return null;
+            }
+
+            return _doctors[index];
+        }
+    }
+
     public void Add(Doctor doctor) {
         if (_count == MaxDoctors) {
             Console.WriteLine("Ліміт лікарів вичерпано.");
@@ -17,16 +30,29 @@ public class DoctorManager {
         Console.WriteLine($"Лікаря [{doctor.Id}] {doctor.FullName} додано.");
     }
 
-    public Doctor FindById(int id) {
+    public Doctor? FindById(int id) {
         for (int i = 0; i < _count; i++) {
             if (_doctors[i].Id == id) {
                 return _doctors[i];
             }
         }
 
-        return null!;
+        return null;
     }
 
+    public bool TryFindById(int id, out Doctor doctor) {
+        Doctor? found = FindById(id);
+
+        if (found == null) {
+            doctor = null!;
+            return false;
+        }
+
+        doctor = found;
+        return true;
+    }
+
+    // Пошук за частиною рядка (як у Лабі 03)
     public Doctor[] FindBySpeciality(string query) {
         string trimmedQuery = query.Trim();
 
@@ -39,7 +65,7 @@ public class DoctorManager {
         int matches = 0;
 
         for (int i = 0; i < _count; i++) {
-            string specialityLower = _doctors[i].Speciality.ToLower();
+            string specialityLower = _doctors[i].Speciality.ToString().ToLower();
 
             if (specialityLower.Contains(queryLower)) {
                 matches++;
@@ -51,9 +77,33 @@ public class DoctorManager {
         int index = 0;
 
         for (int i = 0; i < _count; i++) {
-            string specialityLower = _doctors[i].Speciality.ToLower();
+            string specialityLower = _doctors[i].Speciality.ToString().ToLower();
 
             if (specialityLower.Contains(queryLower)) {
+                result[index] = _doctors[i];
+                index++;
+            }
+        }
+
+        return result;
+    }
+
+    // Точний збіг за enum
+    public Doctor[] FindBySpeciality(Speciality speciality) {
+        int matches = 0;
+
+        for (int i = 0; i < _count; i++) {
+            if (_doctors[i].Speciality == speciality) {
+                matches++;
+            }
+        }
+
+        Doctor[] result = new Doctor[matches];
+
+        int index = 0;
+
+        for (int i = 0; i < _count; i++) {
+            if (_doctors[i].Speciality == speciality) {
                 result[index] = _doctors[i];
                 index++;
             }
@@ -145,7 +195,7 @@ public class DoctorManager {
                         specialityCount++;
                     }
                 }
-                Console.WriteLine($"  {_doctors[i].Speciality}: {specialityCount}");
+                Console.WriteLine($"  {ClinicFormatter.FormatSpeciality(_doctors[i].Speciality)}: {specialityCount}");
             }
         }
     }

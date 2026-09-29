@@ -6,6 +6,19 @@ public class PatientManager
     private Patient[] _patients = new Patient[MaxPatients];
     private int _count = 0;
     public int Count => _count;
+
+    public Patient? this[int index]
+    {
+        get
+        {
+            if (index < 0 || index >= _count) {
+                return null;
+            }
+
+            return _patients[index];
+        }
+    }
+
     public void Add(Patient patient) {
         if (_count == MaxPatients) {
             Console.WriteLine("Ліміт пацієнтів вичерпано.");
@@ -16,7 +29,7 @@ public class PatientManager
         Console.WriteLine($"Пацієнта [{patient.Id}] {patient.FullName} додано.");
     }
 
-    public Patient FindById(int id) {
+    public Patient? FindById(int id) {
         for (int i = 0; i < _count; i++) {
             if (_patients[i].Id == id)
             {
@@ -24,7 +37,19 @@ public class PatientManager
             }
         }
 
-        return null!;
+        return null;
+    }
+
+    public bool TryFindById(int id, out Patient patient) {
+        Patient? found = FindById(id);
+
+        if (found == null) {
+            patient = null!;
+            return false;
+        }
+
+        patient = found;
+        return true;
     }
 
     public Patient[] FindByName(string query) {
@@ -56,6 +81,29 @@ public class PatientManager
             string lastNameLower = _patients[i].LastName.ToLower();
 
             if (firstNameLower.Contains(queryLower) || lastNameLower.Contains(queryLower)) {
+                result[index] = _patients[i];
+                index++;
+            }
+        }
+
+        return result;
+    }
+
+    public Patient[] FindByBloodType(BloodType bloodType) {
+        int matches = 0;
+
+        for (int i = 0; i < _count; i++) {
+            if (_patients[i].BloodType == bloodType) {
+                matches++;
+            }
+        }
+
+        Patient[] result = new Patient[matches];
+
+        int index = 0;
+
+        for (int i = 0; i < _count; i++) {
+            if (_patients[i].BloodType == bloodType) {
                 result[index] = _patients[i];
                 index++;
             }

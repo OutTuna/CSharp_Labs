@@ -7,30 +7,43 @@ public class AppointmentManager {
     private PatientManager _patients;
     private DoctorManager _doctors;
     public int Count => _count;
+
+    public Appointment? this[int index]
+    {
+        get
+        {
+            if (index < 0 || index >= _count) {
+                return null;
+            }
+
+            return _appointments[index];
+        }
+    }
+
     public AppointmentManager(PatientManager patients, DoctorManager doctors) {
         _patients = patients;
         _doctors = doctors;
     }
 
-    private Appointment FindById(int id) {
+    private Appointment? FindById(int id) {
         for (int i = 0; i < _count; i++) {
             if (_appointments[i].Id == id) {
                 return _appointments[i];
             }
         }
 
-        return null!;
+        return null;
     }
 
     public bool Book(int patientId, int doctorId, DateTime scheduledAt, int durationMinutes = 30) {
-        Patient patient = _patients.FindById(patientId);
+        Patient? patient = _patients.FindById(patientId);
 
         if (patient == null) {
             Console.WriteLine($"Помилка: пацієнта з ID {patientId} не знайдено.");
             return false;
         }
 
-        Doctor doctor = _doctors.FindById(doctorId);
+        Doctor? doctor = _doctors.FindById(doctorId);
 
         if (doctor == null) {
             Console.WriteLine($"Помилка: лікаря з ID {doctorId} не знайдено.");
@@ -53,7 +66,7 @@ public class AppointmentManager {
     }
 
     public bool Cancel(int id, string reason) {
-        Appointment appointment = FindById(id);
+        Appointment? appointment = FindById(id);
 
         if (appointment == null) {
             Console.WriteLine($"Запис з ID {id} не знайдено.");
@@ -72,7 +85,7 @@ public class AppointmentManager {
     }
 
     public bool Complete(int id) {
-        Appointment appointment = FindById(id);
+        Appointment? appointment = FindById(id);
 
         if (appointment == null) {
             Console.WriteLine($"Запис з ID {id} не знайдено.");
@@ -159,6 +172,11 @@ public class AppointmentManager {
         return result;
     }
 
+    // Overload: три числа замість DateTime
+    public Appointment[] GetByDate(int year, int month, int day) {
+        return GetByDate(new DateTime(year, month, day));
+    }
+
     public Appointment[] GetUpcoming() {
         int matches = 0;
 
@@ -183,7 +201,7 @@ public class AppointmentManager {
     }
 
     public void DisplayAppointment(Appointment appointment) {
-        Patient patient = _patients.FindById(appointment.PatientId);
+        Patient? patient = _patients.FindById(appointment.PatientId);
 
         string patientName;
 
@@ -193,7 +211,7 @@ public class AppointmentManager {
             patientName = "Пацієнт #" + appointment.PatientId;
         }
 
-        Doctor doctor = _doctors.FindById(appointment.DoctorId);
+        Doctor? doctor = _doctors.FindById(appointment.DoctorId);
 
         string doctorName;
 

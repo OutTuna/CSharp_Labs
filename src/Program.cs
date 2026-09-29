@@ -6,6 +6,8 @@ class Program {
 
         SeedClinic(clinic);
 
+        DemoTask4(clinic);
+
         while (true) {
             Console.WriteLine();
             Console.WriteLine("1. Пацієнти");
@@ -42,28 +44,96 @@ class Program {
         }
     }
 
+    static void DemoTask4(Clinic clinic) {
+        Console.WriteLine();
+        Console.WriteLine("=== Демонстрація Task 4 ===");
+
+        // ?. та ??
+        Console.WriteLine();
+        Console.WriteLine("FindById(1)?.FullName  ?? \"не знайдено\"  → "
+            + (clinic.Patients.FindById(1)?.FullName ?? "не знайдено"));
+        Console.WriteLine("FindById(99)?.FullName ?? \"не знайдено\"  → "
+            + (clinic.Patients.FindById(99)?.FullName ?? "не знайдено"));
+        Console.WriteLine("clinic.Patients[0]?.FullName   ?? \"не знайдено\" → "
+            + (clinic.Patients[0]?.FullName ?? "не знайдено"));
+        Console.WriteLine("clinic.Patients[999]?.FullName ?? \"не знайдено\" → "
+            + (clinic.Patients[999]?.FullName ?? "не знайдено"));
+
+        // TryFindById
+        Console.WriteLine();
+        if (clinic.Patients.TryFindById(3, out Patient foundPatient)) {
+            Console.WriteLine("TryFindById(3)  → знайдено: " + foundPatient.FullName);
+        } else {
+            Console.WriteLine("TryFindById(3)  → пацієнта не знайдено.");
+        }
+
+        if (!clinic.Patients.TryFindById(99, out Patient _)) {
+            Console.WriteLine("TryFindById(99) → пацієнта не знайдено (без винятку).");
+        }
+
+        if (clinic.Doctors.TryFindById(1, out Doctor foundDoctor)) {
+            Console.WriteLine("Doctors.TryFindById(1) → знайдено: " + foundDoctor.FullName);
+        }
+
+        // FindByBloodType
+        Console.WriteLine();
+        Patient[] aPositive = clinic.Patients.FindByBloodType(BloodType.APositive);
+        Console.WriteLine($"FindByBloodType(APositive) → знайдено {aPositive.Length}:");
+        for (int i = 0; i < aPositive.Length; i++) {
+            Console.WriteLine("  " + aPositive[i].FullName);
+        }
+
+        // Overload FindBySpeciality(Speciality)
+        Console.WriteLine();
+        Doctor[] cardiologists = clinic.Doctors.FindBySpeciality(Speciality.Cardiology);
+        Console.WriteLine($"FindBySpeciality(Speciality.Cardiology) → {cardiologists.Length}:");
+        for (int i = 0; i < cardiologists.Length; i++) {
+            Console.WriteLine("  " + cardiologists[i].FullName);
+        }
+
+        Doctor[] byString = clinic.Doctors.FindBySpeciality("cardio");
+        Console.WriteLine($"FindBySpeciality(\"cardio\")            → {byString.Length}");
+
+        // Overload GetByDate(int, int, int)
+        Console.WriteLine();
+        DateTime tomorrow = DateTime.Today.AddDays(1);
+        Appointment[] tomorrowAppointments = clinic.Appointments.GetByDate(tomorrow.Year, tomorrow.Month, tomorrow.Day);
+        Console.WriteLine($"GetByDate({tomorrow.Year}, {tomorrow.Month}, {tomorrow.Day}) → {tomorrowAppointments.Length} запис(ів).");
+
+        Console.WriteLine();
+        Console.WriteLine("=== Кінець демонстрації Task 4 ===");
+        Console.WriteLine();
+    }
+
     static void SeedClinic(Clinic clinic) {
-        clinic.Patients.Add(new Patient("Іван", "Петренко", new DateTime(1985, 5, 10), "A+", "0501234567"));
-        clinic.Patients.Add(new Patient("Олена", "Коваль", new DateTime(1993, 8, 22), "B-", "0672345678"));
-        clinic.Patients.Add(new Patient("Максим", "Бойко", new DateTime(2010, 3, 15), "O+", "0933456789"));
+        clinic.Patients.Add(new Patient("Іван", "Петренко", new DateTime(1985, 5, 10), BloodType.APositive, "0501234567"));
+        clinic.Patients.Add(new Patient("Олена", "Коваль", new DateTime(1993, 8, 22), BloodType.BNegative, "0672345678"));
+        clinic.Patients.Add(new Patient("Максим", "Бойко", new DateTime(2010, 3, 15), BloodType.OPositive, "0933456789"));
         clinic.Patients.Add(new Patient("Марія", "Ткач"));
 
-        Doctor d1 = new Doctor("Олег", "Сидоренко", "Кардіологія", "LIC-001", "0441234567");
-        d1.WorkEndHour = 16;
+        Doctor d1 = new Doctor("Олег", "Сидоренко", Speciality.Cardiology, "LIC-001", "0441234567");
+        d1.Schedule = new WorkSchedule(8, 16);
         clinic.Doctors.Add(d1);
 
-        Doctor d2 = new Doctor("Наталія", "Мороз", "Неврологія", "LIC-002", "0442345678");
-        d2.WorkStartHour = 9;
-        d2.WorkEndHour = 18;
+        Doctor d2 = new Doctor("Наталія", "Мороз", Speciality.Neurology, "LIC-002", "0442345678");
+        d2.Schedule = new WorkSchedule(9, 18);
         clinic.Doctors.Add(d2);
 
-        Doctor d3 = new Doctor("Андрій", "Власенко", "Педіатрія", "LIC-003", "0443456789");
+        Doctor d3 = new Doctor("Андрій", "Власенко", Speciality.Pediatrics, "LIC-003", "0443456789");
         clinic.Doctors.Add(d3);
 
-        Doctor d4 = new Doctor("Марія", "Іваненко", "Кардіологія", "LIC-004", "0445678901");
-        d4.WorkStartHour = 12;
-        d4.WorkEndHour = 20;
+        Doctor d4 = new Doctor("Марія", "Іваненко", Speciality.Cardiology, "LIC-004", "0445678901");
+        d4.Schedule = new WorkSchedule(12, 20);
         clinic.Doctors.Add(d4);
+
+        WorkSchedule morning = new WorkSchedule(8, 16);
+        WorkSchedule copy = morning;
+        Console.WriteLine();
+        Console.WriteLine($"[Експеримент] morning = {morning}");
+        Console.WriteLine($"[Експеримент] copy    = {copy}");
+        Console.WriteLine("[Експеримент] WorkSchedule — value type: copy і morning незалежні.");
+        Console.WriteLine("[Експеримент] Start/End — get-only, тому copy.Start = 5 не скомпілюється.");
+        Console.WriteLine();
 
         DateTime tomorrow = DateTime.Today.AddDays(1);
 
@@ -210,7 +280,7 @@ class Program {
         int tenthId = 0;
 
         for (int i = 1; i <= 20; i++) {
-            Patient patient = new Patient("Тест", "Пацієнт" + i, new DateTime(1990, 1, 1), "A+", "0000000000");
+            Patient patient = new Patient("Тест", "Пацієнт" + i, new DateTime(1990, 1, 1), BloodType.APositive, "0000000000");
 
             if (i == 10) {
                 tenthSaved = true;
@@ -265,7 +335,7 @@ class Program {
             Console.WriteLine("Дата розпізнана некоректно. Використано 01.01.2000.");
         }
 
-        string bloodType = ReadNonEmpty("Група крові: ", "Невідомо");
+        BloodType bloodType = ReadBloodType();
         string phone = ReadNonEmpty("Телефон: ", "0000000000");
 
         Patient patient = new Patient(firstName, lastName, dateOfBirth, bloodType, phone);
@@ -276,7 +346,7 @@ class Program {
     static void AddDoctor(Clinic clinic) {
         string firstName = ReadNonEmpty("Ім'я: ", "Невідомий");
         string lastName = ReadNonEmpty("Прізвище: ", "Лікар");
-        string speciality = ReadNonEmpty("Спеціальність: ", "Невідомо");
+        Speciality speciality = ReadSpeciality();
         string licenseNumber = ReadNonEmpty("Номер ліцензії: ", "LIC-000");
         string phone = ReadNonEmpty("Телефон: ", "0000000000");
 
@@ -285,30 +355,72 @@ class Program {
         Console.WriteLine("Графік роботи (залиште порожнім для 8–17):");
 
         string startText = ReadNonEmpty("Початок роботи (година, напр. 8): ", "");
+        string endText = ReadNonEmpty("Кінець роботи (година, напр. 17): ", "");
+
+        int startHour = 8;
+        int endHour = 17;
 
         if (startText.Length > 0) {
-            int workStart;
+            int parsedStart;
 
-            if (int.TryParse(startText, out workStart) && workStart >= 0 && workStart <= 23) {
-                doctor.WorkStartHour = workStart;
+            if (int.TryParse(startText, out parsedStart) && parsedStart >= 0 && parsedStart <= 23) {
+                startHour = parsedStart;
             } else {
                 Console.WriteLine("Некоректна година. Використано 8.");
             }
         }
 
-        string endText = ReadNonEmpty("Кінець роботи (година, напр. 17): ", "");
-
         if (endText.Length > 0) {
-            int workEnd;
+            int parsedEnd;
 
-            if (int.TryParse(endText, out workEnd) && workEnd >= 0 && workEnd <= 23) {
-                doctor.WorkEndHour = workEnd;
+            if (int.TryParse(endText, out parsedEnd) && parsedEnd >= 0 && parsedEnd <= 23) {
+                endHour = parsedEnd;
             } else {
                 Console.WriteLine("Некоректна година. Використано 17.");
             }
         }
 
+        doctor.Schedule = new WorkSchedule(startHour, endHour);
+
         clinic.Doctors.Add(doctor);
+    }
+
+    static BloodType ReadBloodType() {
+        BloodType[] values = Enum.GetValues<BloodType>();
+
+        Console.WriteLine("Група крові:");
+        for (int i = 0; i < values.Length; i++) {
+            Console.WriteLine($"  {i}. {values[i]}");
+        }
+
+        string input = ReadNonEmpty("Виберіть номер: ", "0");
+        int index;
+
+        if (!int.TryParse(input, out index) || index < 0 || index >= values.Length) {
+            Console.WriteLine("Некоректний вибір. Використано Unknown.");
+            return BloodType.Unknown;
+        }
+
+        return (BloodType)index;
+    }
+
+    static Speciality ReadSpeciality() {
+        Speciality[] values = Enum.GetValues<Speciality>();
+
+        Console.WriteLine("Спеціальність:");
+        for (int i = 0; i < values.Length; i++) {
+            Console.WriteLine($"  {i}. {values[i]}");
+        }
+
+        string input = ReadNonEmpty("Виберіть номер: ", "0");
+        int index;
+
+        if (!int.TryParse(input, out index) || index < 0 || index >= values.Length) {
+            Console.WriteLine("Некоректний вибір. Використано General.");
+            return Speciality.General;
+        }
+
+        return (Speciality)index;
     }
 
     static void FindPatientsByName(Clinic clinic) {

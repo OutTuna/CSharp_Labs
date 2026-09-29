@@ -8,7 +8,7 @@ public class Patient
     public string FirstName { get; set; }
     public string LastName { get; set; }
     public DateTime DateOfBirth { get; set; }
-    public string BloodType { get; set; }
+    public BloodType BloodType { get; set; }
     public string Phone { get; set; }
     public string Email { get; set; }
 
@@ -29,9 +29,9 @@ public class Patient
     public Patient() : this("Невідомий", "Пацієнт") { }
 
     public Patient(string firstName, string lastName)
-        : this(firstName, lastName, new DateTime(2000, 1, 1), "Невідомо", "0000000000") { }
+        : this(firstName, lastName, new DateTime(2000, 1, 1), BloodType.Unknown, "0000000000") { }
 
-    public Patient(string firstName, string lastName, DateTime dob, string bloodType, string phone)
+    public Patient(string firstName, string lastName, DateTime dob, BloodType bloodType, string phone)
     {
         Id = _nextId++;
         FirstName = firstName;
@@ -51,6 +51,10 @@ public class Patient
 
     public override string ToString()
     {
-        return $"[{Id}] {FullName} | Вік: {Age} ({GetAgeCategory()}) | Кров: {BloodType} | Тел: {Phone}";
+        string blood = ClinicFormatter.FormatBloodType(BloodType);
+        string ageText = ClinicFormatter.FormatAge(Age);
+        string phoneText = ClinicFormatter.FormatPhone(Phone);
+
+        return $"[{Id}] {FullName} | Вік: {ageText} ({GetAgeCategory()}) | Кров: {blood} | Тел: {phoneText}";
     }
 }

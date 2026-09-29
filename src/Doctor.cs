@@ -6,23 +6,19 @@ public class Doctor
     public int Id { get; }
     public string FirstName { get; set; }
     public string LastName { get; set; }
-    public string Speciality { get; set; }
+    public Speciality Speciality { get; set; }
     public string LicenseNumber { get; set; }
     public string Phone { get; set; }
-    public int WorkStartHour { get; set; }
-    public int WorkEndHour { get; set; }
+    public WorkSchedule Schedule { get; set; }
     public string FullName => FirstName + " " + LastName;
-    public int WorkingHoursPerDay => WorkEndHour - WorkStartHour;
-    public bool IsAvailableNow => CanAcceptAt(DateTime.Now.Hour);
+    public int WorkingHoursPerDay => Schedule.HoursPerDay;
+    public bool IsAvailableNow => Schedule.IsNow;
 
-    public string WorkSchedule =>
-        WorkStartHour.ToString("D2") + ":00–" + WorkEndHour.ToString("D2") + ":00";
-    
-    public Doctor() : this("Невідомий", "Лікар", "Невідомо")
+    public Doctor() : this("Невідомий", "Лікар", Speciality.General)
     {
     }
 
-    public Doctor(string firstName, string lastName, string speciality)
+    public Doctor(string firstName, string lastName, Speciality speciality)
         : this(firstName, lastName, speciality, "LIC-000", "0000000000")
     {
     }
@@ -30,7 +26,7 @@ public class Doctor
     public Doctor(
         string firstName,
         string lastName,
-        string speciality,
+        Speciality speciality,
         string licenseNumber,
         string phone)
     {
@@ -42,19 +38,20 @@ public class Doctor
         LicenseNumber = licenseNumber;
         Phone = phone;
 
-        WorkStartHour = 8;
-        WorkEndHour = 17;
+        Schedule = new WorkSchedule(8, 17);
     }
 
     public bool CanAcceptAt(int hour)
     {
-        return hour >= WorkStartHour && hour < WorkEndHour;
+        return Schedule.Contains(hour);
     }
 
     public override string ToString()
     {
         string status = IsAvailableNow ? "доступний зараз" : "не в робочий час";
+        string specialityText = ClinicFormatter.FormatSpeciality(Speciality);
+        string phoneText = ClinicFormatter.FormatPhone(Phone);
 
-        return $"[{Id}] {FullName} | {Speciality} | {LicenseNumber} | Тел: {Phone} | {WorkSchedule} ({WorkingHoursPerDay} год) | {status}";
+        return $"[{Id}] {FullName} | {specialityText} | {LicenseNumber} | Тел: {phoneText} | {Schedule} | {status}";
     }
 }
