@@ -51,6 +51,10 @@ public class Patient
 
     public override string ToString()
     {
-        return $"[{Id}] {FullName} | Вік: {Age} ({GetAgeCategory()}) | Кров: {BloodType} | Тел: {Phone}";
+        string blood = ClinicFormatter.FormatBloodType(BloodType);
+        string ageText = ClinicFormatter.FormatAge(Age);
+        string phoneText = ClinicFormatter.FormatPhone(Phone);
+
+        return $"[{Id}] {FullName} | Вік: {ageText} ({GetAgeCategory()}) | Кров: {blood} | Тел: {phoneText}";
     }
 }

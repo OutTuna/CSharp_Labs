@@ -5,6 +5,19 @@ public class DoctorManager {
     private Doctor[] _doctors = new Doctor[MaxDoctors];
     private int _count = 0;
     public int Count => _count;
+
+    public Doctor? this[int index]
+    {
+        get
+        {
+            if (index < 0 || index >= _count) {
+                return null;
+            }
+
+            return _doctors[index];
+        }
+    }
+
     public void Add(Doctor doctor) {
         if (_count == MaxDoctors) {
             Console.WriteLine("Ліміт лікарів вичерпано.");
@@ -145,7 +158,7 @@ public class DoctorManager {
                         specialityCount++;
                     }
                 }
-                Console.WriteLine($"  {_doctors[i].Speciality}: {specialityCount}");
+                Console.WriteLine($"  {ClinicFormatter.FormatSpeciality(_doctors[i].Speciality)}: {specialityCount}");
             }
         }
     }

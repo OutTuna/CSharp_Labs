@@ -7,6 +7,19 @@ public class AppointmentManager {
     private PatientManager _patients;
     private DoctorManager _doctors;
     public int Count => _count;
+
+    public Appointment? this[int index]
+    {
+        get
+        {
+            if (index < 0 || index >= _count) {
+                return null;
+            }
+
+            return _appointments[index];
+        }
+    }
+
     public AppointmentManager(PatientManager patients, DoctorManager doctors) {
         _patients = patients;
         _doctors = doctors;
