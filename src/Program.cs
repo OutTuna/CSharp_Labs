@@ -49,21 +49,29 @@ class Program {
         clinic.Patients.Add(new Patient("Марія", "Ткач"));
 
         Doctor d1 = new Doctor("Олег", "Сидоренко", Speciality.Cardiology, "LIC-001", "0441234567");
-        d1.WorkEndHour = 16;
+        d1.Schedule = new WorkSchedule(8, 16);
         clinic.Doctors.Add(d1);
 
         Doctor d2 = new Doctor("Наталія", "Мороз", Speciality.Neurology, "LIC-002", "0442345678");
-        d2.WorkStartHour = 9;
-        d2.WorkEndHour = 18;
+        d2.Schedule = new WorkSchedule(9, 18);
         clinic.Doctors.Add(d2);
 
         Doctor d3 = new Doctor("Андрій", "Власенко", Speciality.Pediatrics, "LIC-003", "0443456789");
         clinic.Doctors.Add(d3);
 
         Doctor d4 = new Doctor("Марія", "Іваненко", Speciality.Cardiology, "LIC-004", "0445678901");
-        d4.WorkStartHour = 12;
-        d4.WorkEndHour = 20;
+        d4.Schedule = new WorkSchedule(12, 20);
         clinic.Doctors.Add(d4);
+
+        // Експеримент зі struct: value type копіюється при присвоєнні
+        WorkSchedule morning = new WorkSchedule(8, 16);
+        WorkSchedule copy = morning;
+        Console.WriteLine();
+        Console.WriteLine($"[Експеримент] morning = {morning}");
+        Console.WriteLine($"[Експеримент] copy    = {copy}");
+        Console.WriteLine("[Експеримент] WorkSchedule — value type: copy і morning незалежні.");
+        Console.WriteLine("[Експеримент] Start/End — get-only, тому copy.Start = 5 не скомпілюється.");
+        Console.WriteLine();
 
         DateTime tomorrow = DateTime.Today.AddDays(1);
 
@@ -285,28 +293,32 @@ class Program {
         Console.WriteLine("Графік роботи (залиште порожнім для 8–17):");
 
         string startText = ReadNonEmpty("Початок роботи (година, напр. 8): ", "");
+        string endText = ReadNonEmpty("Кінець роботи (година, напр. 17): ", "");
+
+        int startHour = 8;
+        int endHour = 17;
 
         if (startText.Length > 0) {
-            int workStart;
+            int parsedStart;
 
-            if (int.TryParse(startText, out workStart) && workStart >= 0 && workStart <= 23) {
-                doctor.WorkStartHour = workStart;
+            if (int.TryParse(startText, out parsedStart) && parsedStart >= 0 && parsedStart <= 23) {
+                startHour = parsedStart;
             } else {
                 Console.WriteLine("Некоректна година. Використано 8.");
             }
         }
 
-        string endText = ReadNonEmpty("Кінець роботи (година, напр. 17): ", "");
-
         if (endText.Length > 0) {
-            int workEnd;
+            int parsedEnd;
 
-            if (int.TryParse(endText, out workEnd) && workEnd >= 0 && workEnd <= 23) {
-                doctor.WorkEndHour = workEnd;
+            if (int.TryParse(endText, out parsedEnd) && parsedEnd >= 0 && parsedEnd <= 23) {
+                endHour = parsedEnd;
             } else {
                 Console.WriteLine("Некоректна година. Використано 17.");
             }
         }
+
+        doctor.Schedule = new WorkSchedule(startHour, endHour);
 
         clinic.Doctors.Add(doctor);
     }
