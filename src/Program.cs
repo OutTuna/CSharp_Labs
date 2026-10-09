@@ -327,66 +327,82 @@ class Program {
     }
 
     static void AddPatient(Clinic clinic) {
-        string firstName = ReadNonEmpty("Ім'я: ", "Невідомий");
-        string lastName = ReadNonEmpty("Прізвище: ", "Пацієнт");
+        try {
+            string firstName = ReadNonEmpty("Ім'я: ", "Невідомий");
+            string lastName = ReadNonEmpty("Прізвище: ", "Пацієнт");
 
-        string dateText = ReadNonEmpty("Дата народження (дд.мм.рррр): ", "");
+            string dateText = ReadNonEmpty("Дата народження (дд.мм.рррр): ", "");
 
-        DateTime dateOfBirth;
+            DateTime dateOfBirth;
 
-        if (!DateTime.TryParse(dateText, out dateOfBirth)) {
-            dateOfBirth = new DateTime(2000, 1, 1);
-            Console.WriteLine("Дата розпізнана некоректно. Використано 01.01.2000.");
+            if (!DateTime.TryParse(dateText, out dateOfBirth)) {
+                dateOfBirth = new DateTime(2000, 1, 1);
+                Console.WriteLine("Дата розпізнана некоректно. Використано 01.01.2000.");
+            }
+
+            BloodType bloodType = ReadBloodType();
+            string phone = ReadNonEmpty("Телефон: ", "0000000000");
+
+            Patient patient = new Patient(firstName, lastName, dateOfBirth, bloodType, phone);
+
+            clinic.Patients.Add(patient);
         }
-
-        BloodType bloodType = ReadBloodType();
-        string phone = ReadNonEmpty("Телефон: ", "0000000000");
-
-        Patient patient = new Patient(firstName, lastName, dateOfBirth, bloodType, phone);
-
-        clinic.Patients.Add(patient);
+        catch (ArgumentOutOfRangeException e) {
+            Console.WriteLine("Помилка: " + e.Message);
+        }
+        catch (ArgumentException e) {
+            Console.WriteLine("Помилка: " + e.Message);
+        }
     }
 
     static void AddDoctor(Clinic clinic) {
-        string firstName = ReadNonEmpty("Ім'я: ", "Невідомий");
-        string lastName = ReadNonEmpty("Прізвище: ", "Лікар");
-        Speciality speciality = ReadSpeciality();
-        string licenseNumber = ReadNonEmpty("Номер ліцензії: ", "LIC-000");
-        string phone = ReadNonEmpty("Телефон: ", "0000000000");
+        try {
+            string firstName = ReadNonEmpty("Ім'я: ", "Невідомий");
+            string lastName = ReadNonEmpty("Прізвище: ", "Лікар");
+            Speciality speciality = ReadSpeciality();
+            string licenseNumber = ReadNonEmpty("Номер ліцензії: ", "LIC-000");
+            string phone = ReadNonEmpty("Телефон: ", "0000000000");
 
-        Doctor doctor = new Doctor(firstName, lastName, speciality, licenseNumber, phone);
+            Doctor doctor = new Doctor(firstName, lastName, speciality, licenseNumber, phone);
 
-        Console.WriteLine("Графік роботи (залиште порожнім для 8–17):");
+            Console.WriteLine("Графік роботи (залиште порожнім для 8–17):");
 
-        string startText = ReadNonEmpty("Початок роботи (година, напр. 8): ", "");
-        string endText = ReadNonEmpty("Кінець роботи (година, напр. 17): ", "");
+            string startText = ReadNonEmpty("Початок роботи (година, напр. 8): ", "");
+            string endText = ReadNonEmpty("Кінець роботи (година, напр. 17): ", "");
 
-        int startHour = 8;
-        int endHour = 17;
+            int startHour = 8;
+            int endHour = 17;
 
-        if (startText.Length > 0) {
-            int parsedStart;
+            if (startText.Length > 0) {
+                int parsedStart;
 
-            if (int.TryParse(startText, out parsedStart) && parsedStart >= 0 && parsedStart <= 23) {
-                startHour = parsedStart;
-            } else {
-                Console.WriteLine("Некоректна година. Використано 8.");
+                if (int.TryParse(startText, out parsedStart)) {
+                    startHour = parsedStart;
+                } else {
+                    Console.WriteLine("Некоректна година. Використано 8.");
+                }
             }
-        }
 
-        if (endText.Length > 0) {
-            int parsedEnd;
+            if (endText.Length > 0) {
+                int parsedEnd;
 
-            if (int.TryParse(endText, out parsedEnd) && parsedEnd >= 0 && parsedEnd <= 23) {
-                endHour = parsedEnd;
-            } else {
-                Console.WriteLine("Некоректна година. Використано 17.");
+                if (int.TryParse(endText, out parsedEnd)) {
+                    endHour = parsedEnd;
+                } else {
+                    Console.WriteLine("Некоректна година. Використано 17.");
+                }
             }
+
+            doctor.Schedule = new WorkSchedule(startHour, endHour);
+
+            clinic.Doctors.Add(doctor);
         }
-
-        doctor.Schedule = new WorkSchedule(startHour, endHour);
-
-        clinic.Doctors.Add(doctor);
+        catch (ArgumentOutOfRangeException e) {
+            Console.WriteLine("Помилка: " + e.Message);
+        }
+        catch (ArgumentException e) {
+            Console.WriteLine("Помилка: " + e.Message);
+        }
     }
 
     static BloodType ReadBloodType() {
@@ -545,63 +561,71 @@ class Program {
     }
 
     static void BookAppointment(Clinic clinic) {
-        clinic.Patients.DisplayAll();
+        try {
+            clinic.Patients.DisplayAll();
 
-        string patientInput = ReadNonEmpty("Введіть ID пацієнта: ", "");
+            string patientInput = ReadNonEmpty("Введіть ID пацієнта: ", "");
 
-        int patientId;
+            int patientId;
 
-        if (!int.TryParse(patientInput, out patientId)) {
-            Console.WriteLine("Некоректний ID пацієнта.");
-            return;
-        }
-
-        clinic.Doctors.DisplayAll();
-
-        string doctorInput = ReadNonEmpty("Введіть ID лікаря: ", "");
-
-        int doctorId;
-
-        if (!int.TryParse(doctorInput, out doctorId)) {
-            Console.WriteLine("Некоректний ID лікаря.");
-            return;
-        }
-
-        string dateText = ReadNonEmpty("Введіть дату (дд.мм.рррр): ", "");
-
-        DateTime date;
-
-        if (!DateTime.TryParse(dateText, out date)) {
-            Console.WriteLine("Некоректна дата.");
-            return;
-        }
-
-        string timeText = ReadNonEmpty("Введіть час (гг:хх): ", "");
-
-        TimeSpan time;
-
-        if (!TimeSpan.TryParse(timeText, out time)) {
-            Console.WriteLine("Некоректний час.");
-            return;
-        }
-
-        DateTime scheduledAt = date.Date + time;
-
-        string durationText = ReadNonEmpty("Введіть тривалість у хвилинах (30 за замовчуванням): ", "");
-
-        int durationMinutes = 30;
-
-        if (durationText.Length > 0) {
-            int parsedDuration;
-
-            if (int.TryParse(durationText, out parsedDuration) && parsedDuration > 0) {
-                durationMinutes = parsedDuration;
-            } else {
-                Console.WriteLine("Некоректна тривалість. Використано 30.");
+            if (!int.TryParse(patientInput, out patientId)) {
+                Console.WriteLine("Некоректний ID пацієнта.");
+                return;
             }
-        }
 
-        clinic.Appointments.Book(patientId, doctorId, scheduledAt, durationMinutes);
+            clinic.Doctors.DisplayAll();
+
+            string doctorInput = ReadNonEmpty("Введіть ID лікаря: ", "");
+
+            int doctorId;
+
+            if (!int.TryParse(doctorInput, out doctorId)) {
+                Console.WriteLine("Некоректний ID лікаря.");
+                return;
+            }
+
+            string dateText = ReadNonEmpty("Введіть дату (дд.мм.рррр): ", "");
+
+            DateTime date;
+
+            if (!DateTime.TryParse(dateText, out date)) {
+                Console.WriteLine("Некоректна дата.");
+                return;
+            }
+
+            string timeText = ReadNonEmpty("Введіть час (гг:хх): ", "");
+
+            TimeSpan time;
+
+            if (!TimeSpan.TryParse(timeText, out time)) {
+                Console.WriteLine("Некоректний час.");
+                return;
+            }
+
+            DateTime scheduledAt = date.Date + time;
+
+            string durationText = ReadNonEmpty("Введіть тривалість у хвилинах (30 за замовчуванням): ", "");
+
+            int durationMinutes = 30;
+
+            if (durationText.Length > 0) {
+                int parsedDuration;
+
+                if (int.TryParse(durationText, out parsedDuration)) {
+                    durationMinutes = parsedDuration;
+                } else {
+                    Console.WriteLine("Некоректна тривалість. Використано 30.");
+                }
+            }
+
+            clinic.Appointments.Book(patientId, doctorId, scheduledAt, durationMinutes);
+        }
+        catch (ArgumentOutOfRangeException e) {
+            Console.WriteLine("Помилка: " + e.Message);
+        }
+        catch (ArgumentException e) {
+            Console.WriteLine("Помилка: " + e.Message);
+        }
     }
 
     static void CancelAppointment(Clinic clinic) {
