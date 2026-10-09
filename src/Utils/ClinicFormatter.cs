@@ -1,4 +1,6 @@
-namespace ClinicApp;
+using ClinicApp.Enums;
+
+namespace ClinicApp.Utils;
 
 public static class ClinicFormatter {
     public static string FormatBloodType(BloodType bt) {

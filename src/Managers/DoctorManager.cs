@@ -1,4 +1,8 @@
-namespace ClinicApp;
+using ClinicApp.Utils;
+using ClinicApp.Models;
+using ClinicApp.Enums;
+
+namespace ClinicApp.Managers;
 
 public class DoctorManager {
     private const int MaxDoctors = 50;

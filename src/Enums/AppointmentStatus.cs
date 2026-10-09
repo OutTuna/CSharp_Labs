@@ -1,4 +1,4 @@
-namespace ClinicApp;
+namespace ClinicApp.Enums;
 
 public enum AppointmentStatus {
     Scheduled,
