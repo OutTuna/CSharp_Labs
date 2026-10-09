@@ -15,26 +15,60 @@ public class Doctor
     public string FirstName
     {
         get => _firstName;
-        set => _firstName = value;
+        set
+        {
+            if (string.IsNullOrWhiteSpace(value) || value.Length > 50) {
+                throw new ArgumentException("Ім'я має містити від 1 до 50 символів і не бути порожнім.", nameof(FirstName));
+            }
+
+            _firstName = value;
+        }
     }
 
     public string LastName
     {
         get => _lastName;
-        set => _lastName = value;
+        set
+        {
+            if (string.IsNullOrWhiteSpace(value) || value.Length > 50) {
+                throw new ArgumentException("Ім'я має містити від 1 до 50 символів і не бути порожнім.", nameof(LastName));
+            }
+
+            _lastName = value;
+        }
     }
 
     public Speciality Speciality { get; set; }
     public string LicenseNumber
     {
         get => _licenseNumber;
-        set => _licenseNumber = value;
+        set
+        {
+            if (string.IsNullOrWhiteSpace(value)) {
+                throw new ArgumentException("Номер ліцензії не може бути порожнім.", nameof(LicenseNumber));
+            }
+
+            _licenseNumber = value;
+        }
     }
 
     public string Phone
     {
         get => _phone;
-        set => _phone = value;
+        set
+        {
+            if (value == null || value.Length != 10) {
+                throw new ArgumentException("Телефон має містити рівно 10 цифр.", nameof(Phone));
+            }
+
+            for (int i = 0; i < value.Length; i++) {
+                if (value[i] < '0' || value[i] > '9') {
+                    throw new ArgumentException("Телефон має містити лише цифри 0–9.", nameof(Phone));
+                }
+            }
+
+            _phone = value;
+        }
     }
 
     public WorkSchedule Schedule { get; set; }
@@ -58,7 +92,6 @@ public class Doctor
         string licenseNumber,
         string phone)
     {
-        Id = _nextId++;
 
         FirstName = firstName;
         LastName = lastName;
@@ -67,6 +100,7 @@ public class Doctor
         Phone = phone;
 
         Schedule = new WorkSchedule(8, 17);
+        Id = _nextId++;
     }
 
     public bool CanAcceptAt(int hour)
