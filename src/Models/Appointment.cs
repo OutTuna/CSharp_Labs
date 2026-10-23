@@ -4,7 +4,7 @@ using ClinicApp.Enums;
 
 namespace ClinicApp.Models;
 
-public class Appointment : IPayable {
+public class Appointment : IPayable, ICancellable {
     private static int _nextId = 1;
     private int _durationMinutes;
     private bool _isPaid;
@@ -44,6 +44,8 @@ public class Appointment : IPayable {
     }
 
     public bool IsPaid => _isPaid;
+    public bool IsCancelled => Status == AppointmentStatus.Cancelled;
+    public string CancellationReason => IsCancelled ? Notes : "";
 
     public void MarkPaid() {
         if (Status != AppointmentStatus.Cancelled) {
