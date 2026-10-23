@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text;
+using ClinicApp.Interfaces;
 using ClinicApp.Models;
 using ClinicApp.Enums;
 using ClinicApp.Managers;
@@ -19,14 +20,15 @@ class Program {
 
         while (true) {
             Console.WriteLine();
-            Console.WriteLine("1. Пацієнти");
-            Console.WriteLine("2. Лікарі");
-            Console.WriteLine("3. Записи");
-            Console.WriteLine("4. Медична картка");
-            Console.WriteLine("5. Звіт клініки");
-            Console.WriteLine("6. Тест зростаючого масиву");
-            Console.WriteLine("7. Розклад на дату");
-            Console.WriteLine("0. Вихід");
+            Console.WriteLine("1. Пацієнти — реєстрація, пошук");
+            Console.WriteLine("2. Лікарі — персонал, розклад");
+            Console.WriteLine("3. Записи — створення, скасування");
+            Console.WriteLine("4. Медична картка — діагнози, аналізи, рецепти");
+            Console.WriteLine("5. Рахунки — оплата, борги");
+            Console.WriteLine("6. Звіт клініки — статистика, навантаження");
+            Console.WriteLine("7. Тест зростаючого масиву — додавання, пошук");
+            Console.WriteLine("8. Розклад на дату — перегляд записів");
+            Console.WriteLine("0. Вихід — завершення роботи");
             Console.Write("Ваш вибір: ");
 
             string choice = Console.ReadLine()!;
@@ -40,16 +42,66 @@ class Program {
             } else if (choice == "4") {
                 MedicalRecordsMenu(clinic);
             } else if (choice == "5") {
+                BillingMenu(clinic);
+            } else if (choice == "6") {
                 clinic.GenerateReport();
                 Pause();
-            } else if (choice == "6") {
+            } else if (choice == "7") {
                 TestGrowablePatientManager();
                 Pause();
-            } else if (choice == "7") {
+            } else if (choice == "8") {
                 ShowSchedule(clinic);
                 Pause();
             } else if (choice == "0") {
                 break;
+            } else {
+                Console.WriteLine("Невідомий пункт меню.");
+            }
+        }
+    }
+
+    static void BillingMenu(Clinic clinic) {
+        while (true) {
+            Console.WriteLine();
+            Console.WriteLine("── Рахунки ───────────────────");
+            Console.WriteLine("1. Борги пацієнта");
+            Console.WriteLine("2. Всі неоплачені записи");
+            Console.WriteLine("3. Оплатити запис");
+            Console.WriteLine("4. Загальний борг клініки");
+            Console.WriteLine("0. Назад");
+            Console.Write("Ваш вибір: ");
+
+            string choice = Console.ReadLine()!;
+
+            if (choice == "0") {
+                return;
+            }
+
+            if (choice == "1") {
+                clinic.Patients.DisplayAll();
+
+                if (!ReadRecordPatient(clinic, out int patientId)) {
+                    continue;
+                }
+
+                IPayable[] unpaid = clinic.Billing.GetUnpaidByPatient(patientId);
+                clinic.Billing.DisplayUnpaid(unpaid);
+                Console.WriteLine($"Борг пацієнта: {clinic.Billing.GetPatientDebt(patientId):F2}");
+            } else if (choice == "2") {
+                IPayable[] unpaid = clinic.Billing.GetAllUnpaid();
+                clinic.Billing.DisplayUnpaid(unpaid);
+            } else if (choice == "3") {
+                if (!ReadRecordInt("ID запису: ", out int appointmentId)) {
+                    continue;
+                }
+
+                if (clinic.Billing.PayAppointment(appointmentId)) {
+                    Console.WriteLine("Запис оплачено.");
+                } else {
+                    Console.WriteLine("Помилка: запис не знайдено, вже оплачено або скасовано.");
+                }
+            } else if (choice == "4") {
+                Console.WriteLine($"Загальний борг клініки: {clinic.Billing.GetTotalDebt():F2}");
             } else {
                 Console.WriteLine("Невідомий пункт меню.");
             }
