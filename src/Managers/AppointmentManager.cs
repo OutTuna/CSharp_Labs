@@ -222,6 +222,72 @@ public class AppointmentManager {
         return result;
     }
 
+    public Appointment[] GetUrgent() {
+        int matches = 0;
+
+        for (int i = 0; i < _count; i++) {
+            if (_appointments[i] is UrgentAppointment) {
+                matches++;
+            }
+        }
+
+        Appointment[] result = new Appointment[matches];
+        int index = 0;
+
+        for (int i = 0; i < _count; i++) {
+            if (_appointments[i] is UrgentAppointment) {
+                result[index] = _appointments[i];
+                index++;
+            }
+        }
+
+        return result;
+    }
+
+    public Appointment[] GetSpecialist() {
+        int matches = 0;
+
+        for (int i = 0; i < _count; i++) {
+            if (_appointments[i] is SpecialistAppointment) {
+                matches++;
+            }
+        }
+
+        Appointment[] result = new Appointment[matches];
+        int index = 0;
+
+        for (int i = 0; i < _count; i++) {
+            if (_appointments[i] is SpecialistAppointment) {
+                result[index] = _appointments[i];
+                index++;
+            }
+        }
+
+        return result;
+    }
+
+    public Appointment[] GetRegular() {
+        int matches = 0;
+
+        for (int i = 0; i < _count; i++) {
+            if (_appointments[i] is RegularAppointment) {
+                matches++;
+            }
+        }
+
+        Appointment[] result = new Appointment[matches];
+        int index = 0;
+
+        for (int i = 0; i < _count; i++) {
+            if (_appointments[i] is RegularAppointment) {
+                result[index] = _appointments[i];
+                index++;
+            }
+        }
+
+        return result;
+    }
+
     public void DisplayAppointment(Appointment appointment) {
         Patient? patient = _patients.FindById(appointment.PatientId);
 
@@ -244,13 +310,13 @@ public class AppointmentManager {
         }
 
         string timeRange = $"{appointment.ScheduledAt:dd.MM.yyyy HH:mm}–{appointment.EndsAt:HH:mm}";
-        string result = $"[{appointment.Id}] {patientName} → {doctorName} | {timeRange} | {appointment.Status}";
+        string result = $"[{appointment.Id}] {appointment.GetDescription()} | {patientName} → {doctorName} | {timeRange} | {appointment.Status}";
 
         if (appointment.Notes.Length > 0) {
             result += " | " + appointment.Notes;
         }
 
-        Console.WriteLine(result);
+        Console.WriteLine(result + $" | {appointment.GetCost():F2} грн");
     }
 
     public void DisplayList(Appointment[] appointments) {
