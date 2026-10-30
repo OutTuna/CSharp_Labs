@@ -300,8 +300,19 @@ class Program {
         DateTime tomorrow = DateTime.Today.AddDays(1);
 
         clinic.Appointments.Book(1, 1, tomorrow.AddHours(10), 30);
-        clinic.Appointments.Book(2, 2, tomorrow.AddHours(11), 45);
-        clinic.Appointments.Book(3, 3, tomorrow.AddDays(1).AddHours(9), 20);
+        clinic.Appointments.BookUrgent(2, 2, tomorrow.AddHours(11), "біль у грудях");
+        clinic.Appointments.BookSpecialist(3, 3, tomorrow.AddDays(1).AddHours(9), "педіатрія");
+
+        UrgentAppointment urgent = new UrgentAppointment(1, 1, tomorrow.AddHours(12), "тест");
+        Appointment appointment = urgent;
+
+        // тому що GetDescription віртуальний, а в підкласі є override
+        // тому що GetPriority не віртуальний, а new просто його ховає
+        // щоб пріоритет теж так працював, треба virtual у Appointment і override замість new у UrgentAppointment
+        Console.WriteLine();
+        Console.WriteLine("== new vs override ==");
+        Console.WriteLine($"Через Appointment: {appointment.GetDescription()} | пріоритет {appointment.GetPriority()}");
+        Console.WriteLine($"Через UrgentAppointment: {urgent.GetDescription()} | пріоритет {urgent.GetPriority()}");
     }
 
     static void PatientsMenu(Clinic clinic) {
@@ -386,6 +397,7 @@ class Program {
             Console.WriteLine("5. Створити запис");
             Console.WriteLine("6. Скасувати запис");
             Console.WriteLine("7. Завершити запис");
+            Console.WriteLine("9. За типом прийому");
             Console.WriteLine("0. Назад");
             Console.Write("Ваш вибір: ");
 
@@ -409,12 +421,33 @@ class Program {
                 CancelAppointment(clinic);
             } else if (choice == "7") {
                 CompleteAppointment(clinic);
+            } else if (choice == "9") {
+                ShowAppointmentsByType(clinic);
             } else {
                 Console.WriteLine("Невідомий пункт меню.");
                 continue;
             }
 
             Pause();
+        }
+    }
+
+    static void ShowAppointmentsByType(Clinic clinic) {
+        Console.WriteLine("1. Термінові");
+        Console.WriteLine("2. Консультації спеціаліста");
+        Console.WriteLine("3. Звичайні");
+        Console.Write("Ваш вибір: ");
+
+        string choice = Console.ReadLine()!;
+
+        if (choice == "1") {
+            clinic.Appointments.DisplayList(clinic.Appointments.GetUrgent());
+        } else if (choice == "2") {
+            clinic.Appointments.DisplayList(clinic.Appointments.GetSpecialist());
+        } else if (choice == "3") {
+            clinic.Appointments.DisplayList(clinic.Appointments.GetRegular());
+        } else {
+            Console.WriteLine("Невідомий пункт меню.");
         }
     }
 

@@ -38,17 +38,29 @@ public class AppointmentManager {
     }
 
     public bool Book(int patientId, int doctorId, DateTime scheduledAt, int durationMinutes = 30) {
-        Patient? patient = _patients.FindById(patientId);
+        return AddAppointment(new RegularAppointment(patientId, doctorId, scheduledAt, durationMinutes));
+    }
+
+    public bool BookUrgent(int patientId, int doctorId, DateTime scheduledAt, string urgencyNote = "", int durationMinutes = 30) {
+        return AddAppointment(new UrgentAppointment(patientId, doctorId, scheduledAt, urgencyNote, durationMinutes));
+    }
+
+    public bool BookSpecialist(int patientId, int doctorId, DateTime scheduledAt, string topic = "", int durationMinutes = 45) {
+        return AddAppointment(new SpecialistAppointment(patientId, doctorId, scheduledAt, topic, durationMinutes));
+    }
+
+    private bool AddAppointment(Appointment appointment) {
+        Patient? patient = _patients.FindById(appointment.PatientId);
 
         if (patient == null) {
-            Console.WriteLine($"Помилка: пацієнта з ID {patientId} не знайдено.");
+            Console.WriteLine($"Помилка: пацієнта з ID {appointment.PatientId} не знайдено.");
             return false;
         }
 
-        Doctor? doctor = _doctors.FindById(doctorId);
+        Doctor? doctor = _doctors.FindById(appointment.DoctorId);
 
         if (doctor == null) {
-            Console.WriteLine($"Помилка: лікаря з ID {doctorId} не знайдено.");
+            Console.WriteLine($"Помилка: лікаря з ID {appointment.DoctorId} не знайдено.");
             return false;
         }
 
@@ -57,12 +69,10 @@ public class AppointmentManager {
             return false;
         }
 
-        Appointment appointment = new Appointment(patientId, doctorId, scheduledAt, durationMinutes);
-
         _appointments[_count] = appointment;
         _count++;
 
-        Console.WriteLine($"Запис [{appointment.Id}] створено: {patient.FullName} → {doctor.FullName} о {scheduledAt:dd.MM.yyyy HH:mm}");
+        Console.WriteLine($"Запис [{appointment.Id}] створено: {patient.FullName} → {doctor.FullName} о {appointment.ScheduledAt:dd.MM.yyyy HH:mm}");
 
         return true;
     }
@@ -212,6 +222,72 @@ public class AppointmentManager {
         return result;
     }
 
+    public Appointment[] GetUrgent() {
+        int matches = 0;
+
+        for (int i = 0; i < _count; i++) {
+            if (_appointments[i] is UrgentAppointment) {
+                matches++;
+            }
+        }
+
+        Appointment[] result = new Appointment[matches];
+        int index = 0;
+
+        for (int i = 0; i < _count; i++) {
+            if (_appointments[i] is UrgentAppointment) {
+                result[index] = _appointments[i];
+                index++;
+            }
+        }
+
+        return result;
+    }
+
+    public Appointment[] GetSpecialist() {
+        int matches = 0;
+
+        for (int i = 0; i < _count; i++) {
+            if (_appointments[i] is SpecialistAppointment) {
+                matches++;
+            }
+        }
+
+        Appointment[] result = new Appointment[matches];
+        int index = 0;
+
+        for (int i = 0; i < _count; i++) {
+            if (_appointments[i] is SpecialistAppointment) {
+                result[index] = _appointments[i];
+                index++;
+            }
+        }
+
+        return result;
+    }
+
+    public Appointment[] GetRegular() {
+        int matches = 0;
+
+        for (int i = 0; i < _count; i++) {
+            if (_appointments[i] is RegularAppointment) {
+                matches++;
+            }
+        }
+
+        Appointment[] result = new Appointment[matches];
+        int index = 0;
+
+        for (int i = 0; i < _count; i++) {
+            if (_appointments[i] is RegularAppointment) {
+                result[index] = _appointments[i];
+                index++;
+            }
+        }
+
+        return result;
+    }
+
     public void DisplayAppointment(Appointment appointment) {
         Patient? patient = _patients.FindById(appointment.PatientId);
 
@@ -234,13 +310,13 @@ public class AppointmentManager {
         }
 
         string timeRange = $"{appointment.ScheduledAt:dd.MM.yyyy HH:mm}–{appointment.EndsAt:HH:mm}";
-        string result = $"[{appointment.Id}] {patientName} → {doctorName} | {timeRange} | {appointment.Status}";
+        string result = $"[{appointment.Id}] {appointment.GetDescription()} | {patientName} → {doctorName} | {timeRange} | {appointment.Status}";
 
         if (appointment.Notes.Length > 0) {
             result += " | " + appointment.Notes;
         }
 
-        Console.WriteLine(result);
+        Console.WriteLine(result + $" | {appointment.GetCost():F2} грн");
     }
 
     public void DisplayList(Appointment[] appointments) {
