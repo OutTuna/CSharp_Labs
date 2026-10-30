@@ -38,17 +38,29 @@ public class AppointmentManager {
     }
 
     public bool Book(int patientId, int doctorId, DateTime scheduledAt, int durationMinutes = 30) {
-        Patient? patient = _patients.FindById(patientId);
+        return AddAppointment(new RegularAppointment(patientId, doctorId, scheduledAt, durationMinutes));
+    }
+
+    public bool BookUrgent(int patientId, int doctorId, DateTime scheduledAt, string urgencyNote = "", int durationMinutes = 30) {
+        return AddAppointment(new UrgentAppointment(patientId, doctorId, scheduledAt, urgencyNote, durationMinutes));
+    }
+
+    public bool BookSpecialist(int patientId, int doctorId, DateTime scheduledAt, string topic = "", int durationMinutes = 45) {
+        return AddAppointment(new SpecialistAppointment(patientId, doctorId, scheduledAt, topic, durationMinutes));
+    }
+
+    private bool AddAppointment(Appointment appointment) {
+        Patient? patient = _patients.FindById(appointment.PatientId);
 
         if (patient == null) {
-            Console.WriteLine($"Помилка: пацієнта з ID {patientId} не знайдено.");
+            Console.WriteLine($"Помилка: пацієнта з ID {appointment.PatientId} не знайдено.");
             return false;
         }
 
-        Doctor? doctor = _doctors.FindById(doctorId);
+        Doctor? doctor = _doctors.FindById(appointment.DoctorId);
 
         if (doctor == null) {
-            Console.WriteLine($"Помилка: лікаря з ID {doctorId} не знайдено.");
+            Console.WriteLine($"Помилка: лікаря з ID {appointment.DoctorId} не знайдено.");
             return false;
         }
 
@@ -57,12 +69,10 @@ public class AppointmentManager {
             return false;
         }
 
-        Appointment appointment = new Appointment(patientId, doctorId, scheduledAt, durationMinutes);
-
         _appointments[_count] = appointment;
         _count++;
 
-        Console.WriteLine($"Запис [{appointment.Id}] створено: {patient.FullName} → {doctor.FullName} о {scheduledAt:dd.MM.yyyy HH:mm}");
+        Console.WriteLine($"Запис [{appointment.Id}] створено: {patient.FullName} → {doctor.FullName} о {appointment.ScheduledAt:dd.MM.yyyy HH:mm}");
 
         return true;
     }

@@ -300,8 +300,19 @@ class Program {
         DateTime tomorrow = DateTime.Today.AddDays(1);
 
         clinic.Appointments.Book(1, 1, tomorrow.AddHours(10), 30);
-        clinic.Appointments.Book(2, 2, tomorrow.AddHours(11), 45);
-        clinic.Appointments.Book(3, 3, tomorrow.AddDays(1).AddHours(9), 20);
+        clinic.Appointments.BookUrgent(2, 2, tomorrow.AddHours(11), "біль у грудях");
+        clinic.Appointments.BookSpecialist(3, 3, tomorrow.AddDays(1).AddHours(9), "педіатрія");
+
+        UrgentAppointment urgent = new UrgentAppointment(1, 1, tomorrow.AddHours(12), "тест");
+        Appointment appointment = urgent;
+
+        // тому що GetDescription віртуальний, а в підкласі є override
+        // тому що GetPriority не віртуальний, а new просто його ховає
+        // щоб пріоритет теж так працював, треба virtual у Appointment і override замість new у UrgentAppointment
+        Console.WriteLine();
+        Console.WriteLine("== new vs override ==");
+        Console.WriteLine($"Через Appointment: {appointment.GetDescription()} | пріоритет {appointment.GetPriority()}");
+        Console.WriteLine($"Через UrgentAppointment: {urgent.GetDescription()} | пріоритет {urgent.GetPriority()}");
     }
 
     static void PatientsMenu(Clinic clinic) {
