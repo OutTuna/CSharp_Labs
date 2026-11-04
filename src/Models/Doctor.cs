@@ -4,7 +4,7 @@ using ClinicApp.Utils;
 
 namespace ClinicApp.Models;
 
-public class Doctor : ISchedulable
+public class Doctor : ISchedulable, IIdentifiable
 {
     private static int _nextId = 1;
     private string _firstName = "";
