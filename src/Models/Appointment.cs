@@ -4,7 +4,7 @@ using ClinicApp.Enums;
 
 namespace ClinicApp.Models;
 
-public class Appointment : IPayable, ICancellable {
+public class Appointment : IPayable, ICancellable, IIdentifiable {
     private static int _nextId = 1;
     private int _durationMinutes;
     private bool _isPaid;
