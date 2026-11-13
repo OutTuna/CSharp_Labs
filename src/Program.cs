@@ -4,6 +4,7 @@ using ClinicApp.Interfaces;
 using ClinicApp.Models;
 using ClinicApp.Enums;
 using ClinicApp.Managers;
+using ClinicApp.Comparators;
 
 namespace ClinicApp;
 
@@ -27,7 +28,7 @@ class Program {
             Console.WriteLine("5. Рахунки — оплата, борги");
             Console.WriteLine("6. Черга — очікування, прийом");
             Console.WriteLine("7. Звіт клініки — статистика, навантаження");
-            Console.WriteLine("8. Тест зростаючого масиву — додавання, пошук");
+            Console.WriteLine("8. Аналітика — статистика лікарів і пацієнтів");
             Console.WriteLine("9. Розклад на дату — перегляд записів");
             Console.WriteLine("0. Вихід — завершення роботи");
             Console.Write("Ваш вибір: ");
@@ -50,8 +51,7 @@ class Program {
                 clinic.GenerateReport();
                 Pause();
             } else if (choice == "8") {
-                TestGrowablePatientManager();
-                Pause();
+                AnalyticsMenu(clinic);
             } else if (choice == "9") {
                 ShowSchedule(clinic);
                 Pause();
@@ -61,6 +61,86 @@ class Program {
                 Console.WriteLine("Невідомий пункт меню.");
             }
         }
+    }
+
+    static void AnalyticsMenu(Clinic clinic) {
+        while (true) {
+            Console.WriteLine();
+            Console.WriteLine("── Аналітика ───────────────────");
+            Console.WriteLine("  1. Лікарі за навантаженням");
+            Console.WriteLine("  2. Лікарі за виручкою");
+            Console.WriteLine("  3. Лікарі за іменем");
+            Console.WriteLine("  4. Пацієнти за кількістю візитів");
+            Console.WriteLine("  5. Пацієнти за витратами");
+            Console.WriteLine("  0. Назад");
+            Console.Write("Оберіть: ");
+
+            string? choice = Console.ReadLine();
+            if (choice == "0" || choice == null) {
+                return;
+            }
+
+            if (choice == "1" || choice == "2" || choice == "3") {
+                List<DoctorStats> doctors = CollectDoctorStats(clinic);
+
+                if (choice == "1") {
+                    doctors.Sort();
+                } else if (choice == "2") {
+                    doctors.Sort(new DoctorStatsByRevenue());
+                } else {
+                    doctors.Sort(new DoctorStatsByName());
+                }
+
+                if (doctors.Count == 0) {
+                    Console.WriteLine("Список лікарів порожній.");
+                }
+
+                foreach (DoctorStats stats in doctors) {
+                    Console.WriteLine(stats);
+                }
+            } else if (choice == "4" || choice == "5") {
+                List<PatientStats> patients = CollectPatientStats(clinic);
+
+                if (choice == "4") {
+                    patients.Sort();
+                } else {
+                    patients.Sort(new PatientStatsBySpent());
+                }
+
+                if (patients.Count == 0) {
+                    Console.WriteLine("Список пацієнтів порожній.");
+                }
+
+                foreach (PatientStats stats in patients) {
+                    Console.WriteLine(stats);
+                }
+            } else {
+                Console.WriteLine("Невідомий пункт меню.");
+                continue;
+            }
+
+            Pause();
+        }
+    }
+
+    static List<DoctorStats> CollectDoctorStats(Clinic clinic) {
+        List<DoctorStats> result = new List<DoctorStats>();
+
+        foreach (DoctorStats stats in clinic.Analytics.ComputeDoctorStats()) {
+            result.Add(stats);
+        }
+
+        return result;
+    }
+
+    static List<PatientStats> CollectPatientStats(Clinic clinic) {
+        List<PatientStats> result = new List<PatientStats>();
+
+        foreach (PatientStats stats in clinic.Analytics.ComputePatientStats()) {
+            result.Add(stats);
+        }
+
+        return result;
     }
 
     static void WaitingRoomMenu(Clinic clinic) {
