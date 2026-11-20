@@ -5,6 +5,7 @@ using ClinicApp.Models;
 using ClinicApp.Enums;
 using ClinicApp.Managers;
 using ClinicApp.Comparators;
+using ClinicApp.Utils;
 
 namespace ClinicApp;
 
@@ -29,7 +30,7 @@ class Program {
             Console.WriteLine("6. Черга — очікування, прийом");
             Console.WriteLine("7. Звіт клініки — статистика, навантаження");
             Console.WriteLine("8. Аналітика — статистика лікарів і пацієнтів");
-            Console.WriteLine("9. Розклад на дату — перегляд записів");
+            Console.WriteLine("9. Плани лікування — рефлексія, атрибути");
             Console.WriteLine("0. Вихід — завершення роботи");
             Console.Write("Ваш вибір: ");
 
@@ -53,13 +54,89 @@ class Program {
             } else if (choice == "8") {
                 AnalyticsMenu(clinic);
             } else if (choice == "9") {
-                ShowSchedule(clinic);
-                Pause();
+                TreatmentPlansMenu(clinic);
             } else if (choice == "0") {
                 break;
             } else {
                 Console.WriteLine("Невідомий пункт меню.");
             }
+        }
+    }
+
+    static void TreatmentPlansMenu(Clinic clinic) {
+        while (true) {
+            Console.WriteLine();
+            Console.WriteLine("── Плани лікування ────────────────────");
+            Console.WriteLine("  1. Показати всі плани");
+            Console.WriteLine("  2. Додати план лікування");
+            Console.WriteLine("  3. Плани пацієнта");
+            Console.WriteLine("  4. Активувати план");
+            Console.WriteLine("  5. Завершити план");
+            Console.WriteLine("  6. Скасувати план");
+            Console.WriteLine("  7. Інформація про тип TreatmentPlan");
+            Console.WriteLine("  0. Назад");
+            Console.Write("Оберіть: ");
+
+            string? choice = Console.ReadLine();
+            if (choice == "0" || choice == null) {
+                return;
+            }
+
+            if (choice == "1") {
+                DisplayPlans(clinic.TreatmentPlans.GetAll());
+            } else if (choice == "2") {
+                TreatmentPlan plan = FormBuilder.Build<TreatmentPlan>();
+                clinic.TreatmentPlans.Add(plan);
+            } else if (choice == "3") {
+                if (!ReadRecordInt("ID пацієнта: ", out int patientId)) {
+                    continue;
+                }
+
+                DisplayPlans(clinic.TreatmentPlans.GetByPatient(patientId));
+            } else if (choice == "4" || choice == "5" || choice == "6") {
+                if (!ReadRecordInt("ID плану: ", out int planId)) {
+                    continue;
+                }
+
+                TreatmentPlan? plan = clinic.TreatmentPlans.GetById(planId);
+                if (plan == null) {
+                    Console.WriteLine("План не знайдено.");
+                } else {
+                    bool changed;
+
+                    if (choice == "4") {
+                        changed = plan.Activate();
+                    } else if (choice == "5") {
+                        changed = plan.Complete();
+                    } else {
+                        changed = plan.Cancel();
+                    }
+
+                    if (changed) {
+                        Console.WriteLine($"План [{plan.Id}] тепер має статус {plan.Status}.");
+                    } else {
+                        Console.WriteLine($"Перехід неможливий: план [{plan.Id}] має статус {plan.Status}.");
+                    }
+                }
+            } else if (choice == "7") {
+                ModelValidator.PrintInfo(typeof(TreatmentPlan));
+            } else {
+                Console.WriteLine("Невідомий пункт меню.");
+                continue;
+            }
+
+            Pause();
+        }
+    }
+
+    static void DisplayPlans(TreatmentPlan[] plans) {
+        if (plans.Length == 0) {
+            Console.WriteLine("Планів не знайдено.");
+            return;
+        }
+
+        foreach (TreatmentPlan plan in plans) {
+            Console.WriteLine(plan);
         }
     }
 
