@@ -73,6 +73,7 @@ class Program {
             Console.WriteLine("  1. Останні рядки лога");
             Console.WriteLine("  2. Очистити лог");
             Console.WriteLine("  3. Експортувати всі звіти");
+            Console.WriteLine("  4. Імпорт пацієнтів з CSV");
             Console.WriteLine("  0. Назад");
             Console.Write("Оберіть: ");
 
@@ -116,6 +117,11 @@ class Program {
                     Console.WriteLine("Помилка запису: " + e.Message);
                     clinic.Logger.LogError("Помилка експорту: " + e.Message);
                 }
+            } else if (choice == "4") {
+                string path = ReadRecordText("Шлях до CSV-файлу: ");
+                ImportResult result = CsvImporter.ImportPatients(clinic, path);
+                result.Print();
+                clinic.Logger.LogInfo($"Імпорт з {path}: імпортовано {result.Imported}, пропущено {result.Skipped}");
             } else {
                 Console.WriteLine("Невідомий пункт меню.");
                 continue;
