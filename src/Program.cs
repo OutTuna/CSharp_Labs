@@ -72,6 +72,7 @@ class Program {
             Console.WriteLine("── Файли ───────────────────────");
             Console.WriteLine("  1. Останні рядки лога");
             Console.WriteLine("  2. Очистити лог");
+            Console.WriteLine("  3. Експортувати всі звіти");
             Console.WriteLine("  0. Назад");
             Console.Write("Оберіть: ");
 
@@ -96,6 +97,25 @@ class Program {
             } else if (choice == "2") {
                 clinic.Logger.Clear();
                 Console.WriteLine("Лог очищено.");
+            } else if (choice == "3") {
+                try {
+                    string[] paths = clinic.Exporter.ExportAll();
+                    Console.WriteLine("Звіти збережено:");
+
+                    for (int i = 0; i < paths.Length; i++) {
+                        Console.WriteLine($"  {paths[i]}");
+                    }
+
+                    clinic.Logger.LogInfo($"Експортовано звітів: {paths.Length}");
+                }
+                catch (IOException e) {
+                    Console.WriteLine("Помилка запису: " + e.Message);
+                    clinic.Logger.LogError("Помилка експорту: " + e.Message);
+                }
+                catch (UnauthorizedAccessException e) {
+                    Console.WriteLine("Помилка запису: " + e.Message);
+                    clinic.Logger.LogError("Помилка експорту: " + e.Message);
+                }
             } else {
                 Console.WriteLine("Невідомий пункт меню.");
                 continue;
