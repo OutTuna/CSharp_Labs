@@ -20,6 +20,22 @@ class Program {
 
         SeedMedicalRecords(clinic);
 
+        if (clinic.Session.Exists()) {
+            Console.Write("Знайдено збережену сесію. Завантажити? (y/n): ");
+
+            if (ReadYes()) {
+                try {
+                    int loaded = clinic.Session.Load(clinic);
+                    Console.WriteLine($"Завантажено {loaded} пацієнтів.");
+                    clinic.Logger.LogInfo($"Сесію завантажено: {loaded} пацієнтів");
+                }
+                catch (IOException e) {
+                    Console.WriteLine("Помилка читання сесії: " + e.Message);
+                    clinic.Logger.LogError("Помилка читання сесії: " + e.Message);
+                }
+            }
+        }
+
         while (true) {
             Console.WriteLine();
             Console.WriteLine("1. Пацієнти — реєстрація, пошук");
@@ -59,11 +75,30 @@ class Program {
             } else if (choice == "10") {
                 FilesMenu(clinic);
             } else if (choice == "0") {
+                Console.Write("Зберегти сесію? (y/n): ");
+
+                if (ReadYes()) {
+                    try {
+                        clinic.Session.Save(clinic);
+                        Console.WriteLine("Сесію збережено.");
+                        clinic.Logger.LogInfo($"Сесію збережено: {clinic.Patients.Count} пацієнтів");
+                    }
+                    catch (IOException e) {
+                        Console.WriteLine("Помилка збереження сесії: " + e.Message);
+                        clinic.Logger.LogError("Помилка збереження сесії: " + e.Message);
+                    }
+                }
+
                 break;
             } else {
                 Console.WriteLine("Невідомий пункт меню.");
             }
         }
+    }
+
+    static bool ReadYes() {
+        string? answer = Console.ReadLine();
+        return answer != null && answer.Trim().ToLower() == "y";
     }
 
     static void FilesMenu(Clinic clinic) {
