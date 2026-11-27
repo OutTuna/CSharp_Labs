@@ -6,6 +6,7 @@ using ClinicApp.Enums;
 using ClinicApp.Managers;
 using ClinicApp.Comparators;
 using ClinicApp.Utils;
+using ClinicApp.Events;
 
 namespace ClinicApp;
 
@@ -15,6 +16,8 @@ class Program {
         Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
         Console.OutputEncoding = Encoding.UTF8;
         Clinic clinic = new Clinic("Медична Клініка");
+
+        clinic.Appointments.AppointmentBooked += OnAppointmentBookedConsole;
 
         SeedClinic(clinic);
 
@@ -94,6 +97,10 @@ class Program {
                 Console.WriteLine("Невідомий пункт меню.");
             }
         }
+    }
+
+    static void OnAppointmentBookedConsole(object? sender, AppointmentEventArgs e) {
+        Console.WriteLine($"  [EVENT] Запис #{e.AppointmentId} створено: пацієнт #{e.PatientId} → лікар #{e.DoctorId}, {e.ScheduledAt:dd.MM.yyyy HH:mm}");
     }
 
     static bool ReadYes() {
