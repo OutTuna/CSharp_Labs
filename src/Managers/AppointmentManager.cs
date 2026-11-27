@@ -12,6 +12,9 @@ public class AppointmentManager {
     public int Count => _count;
 
     public event EventHandler<AppointmentEventArgs>? AppointmentBooked;
+    public event EventHandler<AppointmentEventArgs>? UrgentAppointmentBooked;
+    public event EventHandler<AppointmentEventArgs>? AppointmentCancelled;
+    public event EventHandler<AppointmentEventArgs>? AppointmentCompleted;
 
     public Appointment? this[int index]
     {
@@ -45,7 +48,14 @@ public class AppointmentManager {
     }
 
     public bool BookUrgent(int patientId, int doctorId, DateTime scheduledAt, string urgencyNote = "", int durationMinutes = 30) {
-        return AddAppointment(new UrgentAppointment(patientId, doctorId, scheduledAt, urgencyNote, durationMinutes));
+        UrgentAppointment appointment = new UrgentAppointment(patientId, doctorId, scheduledAt, urgencyNote, durationMinutes);
+
+        if (!AddAppointment(appointment)) {
+            return false;
+        }
+
+        UrgentAppointmentBooked?.Invoke(this, CreateArgs(appointment, appointment.UrgencyNote));
+        return true;
     }
 
     public bool BookSpecialist(int patientId, int doctorId, DateTime scheduledAt, string topic = "", int durationMinutes = 45) {
@@ -77,9 +87,13 @@ public class AppointmentManager {
 
         Console.WriteLine($"Запис [{appointment.Id}] створено: {patient.FullName} → {doctor.FullName} о {appointment.ScheduledAt:dd.MM.yyyy HH:mm}");
 
-        AppointmentBooked?.Invoke(this, new AppointmentEventArgs(appointment.Id, appointment.PatientId, appointment.DoctorId, appointment.ScheduledAt, appointment.Notes));
+        AppointmentBooked?.Invoke(this, CreateArgs(appointment, appointment.Notes));
 
         return true;
+    }
+
+    private static AppointmentEventArgs CreateArgs(Appointment appointment, string notes) {
+        return new AppointmentEventArgs(appointment.Id, appointment.PatientId, appointment.DoctorId, appointment.ScheduledAt, notes);
     }
 
     public bool Cancel(int id, string reason) {
@@ -94,11 +108,27 @@ public class AppointmentManager {
 
         if (success) {
             Console.WriteLine($"Запис [{id}] скасовано.");
+            AppointmentCancelled?.Invoke(this, CreateArgs(appointment, appointment.Notes));
         } else {
             Console.WriteLine($"Запис [{id}] вже скасовано або завершено.");
         }
 
         return success;
+    }
+
+    public int CancelAll(int doctorId, string reason = "") {
+        int cancelled = 0;
+
+        for (int i = 0; i < _count; i++) {
+            Appointment appointment = _appointments[i];
+
+            if (appointment.DoctorId == doctorId && appointment.IsUpcoming && appointment.Cancel(reason)) {
+                cancelled++;
+                AppointmentCancelled?.Invoke(this, CreateArgs(appointment, appointment.Notes));
+            }
+        }
+
+        return cancelled;
     }
 
     public bool Complete(int id) {
@@ -113,6 +143,7 @@ public class AppointmentManager {
 
         if (success) {
             Console.WriteLine($"Запис [{id}] завершено.");
+            AppointmentCompleted?.Invoke(this, CreateArgs(appointment, appointment.Notes));
         } else {
             Console.WriteLine($"Запис [{id}] вже скасовано або завершено.");
         }

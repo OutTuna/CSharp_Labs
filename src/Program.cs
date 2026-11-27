@@ -217,7 +217,7 @@ class Program {
                     if (choice == "4") {
                         changed = plan.Activate();
                     } else if (choice == "5") {
-                        changed = plan.Complete();
+                        changed = clinic.TreatmentPlans.Complete(plan.Id);
                     } else {
                         changed = plan.Cancel();
                     }
@@ -422,7 +422,6 @@ class Program {
 
                 if (clinic.Billing.PayAppointment(appointmentId)) {
                     Console.WriteLine("Запис оплачено.");
-                    clinic.Logger.LogInfo($"Запис #{appointmentId} оплачено");
                 } else {
                     Console.WriteLine("Помилка: запис не знайдено, вже оплачено або скасовано.");
                 }
@@ -865,7 +864,6 @@ class Program {
             Patient patient = new Patient(firstName, lastName, dateOfBirth, bloodType, phone);
 
             clinic.Patients.Add(patient);
-            clinic.Logger.LogInfo($"Додано пацієнта #{patient.Id}: {patient.FullName}");
         }
         catch (ArgumentOutOfRangeException e) {
             Console.WriteLine("Помилка: " + e.Message);
@@ -1143,13 +1141,7 @@ class Program {
                 }
             }
 
-            if (clinic.Appointments.Book(patientId, doctorId, scheduledAt, durationMinutes)) {
-                Appointment? created = clinic.Appointments[clinic.Appointments.Count - 1];
-
-                if (created != null) {
-                    clinic.Logger.LogInfo($"Запис #{created.Id} створено: пацієнт #{patientId} → лікар #{doctorId}");
-                }
-            }
+            clinic.Appointments.Book(patientId, doctorId, scheduledAt, durationMinutes);
         }
         catch (ArgumentOutOfRangeException e) {
             Console.WriteLine("Помилка: " + e.Message);
@@ -1173,9 +1165,7 @@ class Program {
 
         string reason = ReadNonEmpty("Введіть причину (або залиште порожнім): ", "");
 
-        if (clinic.Appointments.Cancel(id, reason)) {
-            clinic.Logger.LogInfo($"Запис #{id} скасовано");
-        }
+        clinic.Appointments.Cancel(id, reason);
     }
 
     static void CompleteAppointment(Clinic clinic) {
@@ -1188,9 +1178,7 @@ class Program {
             return;
         }
 
-        if (clinic.Appointments.Complete(id)) {
-            clinic.Logger.LogInfo($"Запис #{id} завершено");
-        }
+        clinic.Appointments.Complete(id);
     }
 
     static string ReadNonEmpty(string prompt, string defaultValue) {
