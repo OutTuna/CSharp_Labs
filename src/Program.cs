@@ -78,6 +78,18 @@ class Program {
             } else if (choice == "10") {
                 FilesMenu(clinic);
             } else if (choice == "0") {
+                Console.WriteLine();
+                clinic.Tracker.PrintSummary();
+
+                try {
+                    clinic.Tracker.SaveSummary();
+                }
+                catch (IOException e) {
+                    Console.WriteLine("Помилка збереження підсумку: " + e.Message);
+                    clinic.Logger.LogError("Помилка збереження підсумку: " + e.Message);
+                }
+
+                Console.WriteLine();
                 Console.Write("Зберегти сесію? (y/n): ");
 
                 if (ReadYes()) {
